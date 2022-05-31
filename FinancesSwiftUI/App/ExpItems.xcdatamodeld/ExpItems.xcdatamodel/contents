@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="19H524" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="AvailableAmount" representedClassName="AvailableAmount" syncable="YES" codeGenerationType="class"/>
     <entity name="ExpItem" representedClassName="ExpItem" syncable="YES" codeGenerationType="class">
         <attribute name="expAmount" attributeType="String"/>
         <attribute name="expCategory" attributeType="String"/>
@@ -9,5 +10,6 @@
     </entity>
     <elements>
         <element name="ExpItem" positionX="-54" positionY="-9" width="128" height="118"/>
+        <element name="AvailableAmount" positionX="-54" positionY="36" width="128" height="29"/>
     </elements>
 </model>

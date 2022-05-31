@@ -13,6 +13,7 @@ struct HeaderView: View {
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
     
+    
     @State private var categoryViewIsShowing = false
     @State private var nextPayDateAlertIsShowing = false
     @State private var dailyBreakdownViewIsShowing = false
@@ -32,7 +33,7 @@ struct HeaderView: View {
                             .fontWeight(.black)
                             .foregroundColor(Color.black)
                     }.padding()
-                    .foregroundColor(.black)
+                        .foregroundColor(.black)
                 }.sheet(isPresented: $categoryViewIsShowing, onDismiss: {}, content: {
                     CategoryView(category: "Total")
                 })
@@ -70,7 +71,15 @@ struct HeaderView: View {
                         }
                     }.padding()
                 }.alert(isPresented: $dailyBreakdownViewIsShowing) {
-                    Alert(title: Text("Daily Breakdown"), message: Text("You can spend $\(getDailyBreakdown(), specifier: "%.2f") today."), dismissButton: .default(Text("Gotcha")))
+                    Alert(title: Text("Daily Breakdown"),
+                          message: Text("You can spend $\(getDailyBreakdown(), specifier: "%.2f") today."),
+                          primaryButton: .default(Text("Change starting amount")) {
+                            print("Changing starting amount to __")
+                            var preferences = [String: String]()
+                            preferences["availableAmount"] = "1000.00"
+                            setPlistAvailableAmount(preferences: preferences)
+                    },
+                          secondaryButton: .cancel(Text("Gotcha")))
                 }
             }
         }
@@ -80,6 +89,7 @@ struct HeaderView: View {
         var payDate = ""
         let date = getDate()
         
+        // TODO: Update this to account for paydays other than 15th and the 30th
         // Didn't want to deal with the date formatter
         let month = Int(date.dropLast(6))
         let day = Int((date.dropFirst(3)).dropLast(3))!
@@ -123,8 +133,39 @@ struct HeaderView: View {
     
     private func getRemaining() -> Double {
         let totalExp = getTotal()
-        let difference: Double = 782.44 - totalExp
+        
+        let plistAvailAmount = getPlistAvailableAmount()
+        print("Got from plist: \(plistAvailAmount)")
+        guard let availableAmt = Double(plistAvailAmount) else {return 0.0}
+        
+        let difference: Double = availableAmt - totalExp
+        
         return difference
+    }
+    
+    private func getPlistAvailableAmount() -> String {
+        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return "0.0"}
+        let url = URL(fileURLWithPath: path)
+        let data = try! Data(contentsOf: url)
+        guard let plist = try! PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String:String] else {return "0.0"}
+        return (plist["availableAmount"] ?? "0.00") as String
+    }
+    
+    private func setPlistAvailableAmount(preferences: [String: String]) {
+        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return}
+        let url = URL(fileURLWithPath: path)
+        let encoder = PropertyListEncoder()
+        if let data = try? encoder.encode(preferences) {
+            if FileManager.default.fileExists(atPath: path) {
+                // Update an existing plist
+                try? data.write(to: url)
+                print("Saved to EXISTING Defaults file: \(getPlistAvailableAmount())")
+            } else {
+                // Create a new plist
+                FileManager.default.createFile(atPath: path, contents: data, attributes: nil)
+                print("Saved to NEW Defaults file: \(getPlistAvailableAmount())")
+            }
+        }
     }
     
     private func getTotal() -> Double {
@@ -137,13 +178,13 @@ struct HeaderView: View {
     
     private func getDate() -> String {
         let date = Date()
-
+        
         // Create Date Formatter
         let dateFormatter = DateFormatter()
-
+        
         // Set Date Format
         dateFormatter.dateFormat = "MM/dd/YY"
-
+        
         // Convert Date to String
         return dateFormatter.string(from: date)
     }

@@ -37,7 +37,7 @@ struct ExpenseRowView: View {
         }.background(
             RoundedRectangle(cornerRadius: 10)
                 .strokeBorder(accentColor.opacity(0.4), lineWidth: 2)
-                .frame(width: 380, height: 60)
+                .frame(width: 350, height: 60)
                 .padding(7)
                 .background(Color.white).edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
         ).foregroundColor(Color.black).background(Color.white).edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
