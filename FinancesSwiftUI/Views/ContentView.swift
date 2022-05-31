@@ -60,8 +60,10 @@ struct ContentView: View {
             // Add Button
             HStack {
                 Spacer()
-                AddButtonView()
-                    .padding(.trailing, 50)
+                AddButtonView(buttonText: "settings")
+                Spacer()
+                AddButtonView(buttonText: "add")
+                Spacer()
             }
             Spacer()
         }.background(Color.white).edgesIgnoringSafeArea(.all)

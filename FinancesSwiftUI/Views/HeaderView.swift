@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct HeaderView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -45,7 +46,7 @@ struct HeaderView: View {
                         .font(.title3)
                         .foregroundColor(Color.black)
                 }.alert(isPresented: $nextPayDateAlertIsShowing) {
-                    Alert(title: Text("Pay Day: \(getNextPayDay())"), message: Text("\"Daily Breakdown\" value is based off of this date."), dismissButton: .default(Text("Gotcha")))
+                    Alert(title: Text("Next Pay Day: \(getNextPayDay())"), message: Text("\"Daily Breakdown\" value is based off of this date."), dismissButton: .default(Text("Gotcha")))
                 }
                 
                 Spacer()
@@ -71,38 +72,56 @@ struct HeaderView: View {
                         }
                     }.padding()
                 }.alert(isPresented: $dailyBreakdownViewIsShowing) {
-                    Alert(title: Text("Daily Breakdown"),
-                          message: Text("You can spend $\(getDailyBreakdown(), specifier: "%.2f") today."),
-                          primaryButton: .default(Text("Change starting amount")) {
-                            print("Changing starting amount to __")
-                            var preferences = [String: String]()
-                            preferences["availableAmount"] = "1000.00"
-                            setPlistAvailableAmount(preferences: preferences)
-                    },
-                          secondaryButton: .cancel(Text("Gotcha")))
+                    let dailyBreakdown = getDailyBreakdown()
+                    return Alert(title: Text("Daily Breakdown: $\(dailyBreakdown, specifier: "%.2f")"),
+                                 message: Text("You can spend $\(dailyBreakdown, specifier: "%.2f") today. You can change initial Available Amount in the Settings screen."),
+                                 dismissButton: .default(Text("Gotcha")))
                 }
             }
         }
     }
     
+    // Returns format like ["1", "15"]
+    private func getPayDays() -> [String] {
+        let payDaysString = getPlistValue(key: "payDays")
+        var payDaysArray: [String] = []
+        if payDaysString.contains(",") {
+            payDaysArray = payDaysString.components(separatedBy: ",")
+        } else {
+            payDaysArray = [payDaysString]
+        }
+        return payDaysArray
+    }
+    
     private func getNextPayDay() -> String {
         var payDate = ""
         let date = getDate()
+        let payDayArray = getPayDays()
+        if payDayArray.count == 1 && payDayArray[0] == "" {
+            print("Invalid payday array")
+            return ""
+        }
         
         // TODO: Update this to account for paydays other than 15th and the 30th
         // Didn't want to deal with the date formatter
         let month = Int(date.dropLast(6))
         let day = Int((date.dropFirst(3)).dropLast(3))!
         let year = Int(date.dropFirst(6))
+        var nextPayDay: Int = -1
         
-        if day >= 1 && day < 15 {
-            payDate = "\(month!)/15/\(year!)"
-        } else if day >= 15 && day < 30 {
-            payDate = "\(month!)/30/\(year!)"
-        } else if day == 30 && month == 12 {
-            payDate = "\(month! + 1)/30/\(year! + 1)"
-        } else if day == 30 {
-            payDate = "\(month! + 1)/30/\(year!)"
+        for payday in payDayArray {
+            if Int(payday)! > day {
+                nextPayDay = Int(payday)!
+                break
+            }
+        }
+        
+        if nextPayDay != -1 {
+            payDate = "\(month!)/\(nextPayDay)/\(year!)"
+        } else if nextPayDay == -1 && month! < 12 {
+            payDate = "\(month! + 1)/\(payDayArray[0])/\(year!)"
+        } else if nextPayDay == -1 && month! == 12 {
+            payDate = "\(month! + 1)/\(payDayArray[0])/\(year! + 1)"
         }
         
         return payDate
@@ -112,18 +131,26 @@ struct HeaderView: View {
         let remainingFunds = getRemaining()
         if remainingFunds < 0 { return 0.0 }
         
-        let date = getDate()
-        let day = Int((date.dropFirst(3)).dropLast(3))! // didn't want to deal with the dateFormatter()
-        var daysLeft = 0
+        let dateStr = getDate()
+        let dateStrItems = dateStr.components(separatedBy: "/")
+        let day = Int(dateStr.components(separatedBy: "/")[1])! // didn't want to deal with the dateFormatter()
         
-        if day >= 1 && day < 15 {
-            daysLeft = 15 - day
-        } else if day >= 15 && day < 30 {
-            daysLeft = 30 - day
-        } else if day == 15 || day == 30 {
-            daysLeft = 1
-        } else if day == 31 {
-            daysLeft = 16
+        let nextPayDayString = getNextPayDay()
+        let dateItems = nextPayDayString.components(separatedBy: "/")
+        let nextPayDay = Int(dateItems[1])!
+        
+        let dateComponents = DateComponents(year: Int(dateStrItems[2]), month: Int(dateStrItems[0]))
+        let calendar = Calendar.current
+        let date = calendar.date(from: dateComponents)!
+        let range = calendar.range(of: .day, in: .month, for: date)!
+        let numDays = range.count
+        let numDaysLeftInCurrentMonth = numDays - Int(dateStrItems[1])!
+        
+        var daysLeft = 0
+        if day < nextPayDay {
+            daysLeft = nextPayDay - day
+        } else if day >= nextPayDay {
+            daysLeft = nextPayDay + numDaysLeftInCurrentMonth
         }
         
         let dailySpend = remainingFunds / Double(daysLeft)
@@ -134,7 +161,7 @@ struct HeaderView: View {
     private func getRemaining() -> Double {
         let totalExp = getTotal()
         
-        let plistAvailAmount = getPlistAvailableAmount()
+        let plistAvailAmount = getPlistValue(key: "availableAmount")
         print("Got from plist: \(plistAvailAmount)")
         guard let availableAmt = Double(plistAvailAmount) else {return 0.0}
         
@@ -143,29 +170,12 @@ struct HeaderView: View {
         return difference
     }
     
-    private func getPlistAvailableAmount() -> String {
+    private func getPlistValue(key: String) -> String {
         guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return "0.0"}
         let url = URL(fileURLWithPath: path)
         let data = try! Data(contentsOf: url)
         guard let plist = try! PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String:String] else {return "0.0"}
-        return (plist["availableAmount"] ?? "0.00") as String
-    }
-    
-    private func setPlistAvailableAmount(preferences: [String: String]) {
-        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return}
-        let url = URL(fileURLWithPath: path)
-        let encoder = PropertyListEncoder()
-        if let data = try? encoder.encode(preferences) {
-            if FileManager.default.fileExists(atPath: path) {
-                // Update an existing plist
-                try? data.write(to: url)
-                print("Saved to EXISTING Defaults file: \(getPlistAvailableAmount())")
-            } else {
-                // Create a new plist
-                FileManager.default.createFile(atPath: path, contents: data, attributes: nil)
-                print("Saved to NEW Defaults file: \(getPlistAvailableAmount())")
-            }
-        }
+        return (plist[key] ?? "") as String
     }
     
     private func getTotal() -> Double {
@@ -187,6 +197,16 @@ struct HeaderView: View {
         
         // Convert Date to String
         return dateFormatter.string(from: date)
+    }
+}
+
+extension Date {
+    func startOfMonth() -> Date {
+        return Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Calendar.current.startOfDay(for: self)))!
+    }
+    
+    func endOfMonth() -> Date {
+        return Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: self.startOfMonth())!
     }
 }
 
