@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+struct DefaultInfo: Codable {
+    var availableAmount: String
+    var payDays: String
+}
+
 struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     
@@ -17,7 +22,7 @@ struct SettingsView: View {
     @State private var showingDetail = false
     @State private var availableAmount: String = ""
     @State private var isEditingAvailAmt = false
-    @State private var payDates: String = ""
+    @State private var payDays: String = ""
     @State private var isEditingPayDates = false
     
     init() {
@@ -42,7 +47,7 @@ struct SettingsView: View {
                     .padding(.leading)
                     .foregroundColor(Color.white)
                 TextField(
-                    getPlistValue(key: "availableAmount"),
+                    getDefaultInfo()!.availableAmount,
                     text: $availableAmount
                 ) { isEditing in
                     self.isEditingAvailAmt = isEditing
@@ -61,7 +66,7 @@ struct SettingsView: View {
                 Spacer()
                 TextField(
                     "ex. 1st, 15th = 1,15",
-                    text: $payDates
+                    text: $payDays
                 ) { isEditing in
                     self.isEditingPayDates = isEditing
                 } onCommit: {}
@@ -73,24 +78,22 @@ struct SettingsView: View {
             Spacer()
             // Add Item Button
             Button(action: {
-                let existingAvailableAmount = getPlistValue(key: "availableAmount")
-                let existingPayDays = getPlistValue(key: "payDays")
-                if availableAmount == "" && payDates == "" {
+                if availableAmount == "" && payDays == "" {
                     showingIncompleteAlert = true
                 } else if !availableAmount.allSatisfy({ $0.isNumber }) {
                     showingInvalidAvailAmountAlert = true
-                } else if !payDates.allSatisfy({ $0.isNumber || $0 == "," }) {
+                } else if !payDays.allSatisfy({ $0.isNumber || $0 == "," }) {
                     // Anything other than a number or a comma
                     showingInvalidPayDatesAlert = true
-                } else if availableAmount != "" && payDates == "" {
-                    setPlistProperty(property: ["availableAmount": availableAmount, "payDays": existingPayDays])
+                } else if availableAmount != "" && payDays == "" {
+                    setDefaultInfoForProperty(keyValue: ["availableAmount": availableAmount])
                     // Show successful alert
                     showingDetail = true
-                } else if availableAmount == "" && payDates != "" {
-                    setPlistProperty(property: ["payDays": payDates, "availableAmount": existingAvailableAmount])
+                } else if availableAmount == "" && payDays != "" {
+                    setDefaultInfoForProperty(keyValue: ["payDays": payDays])
                     showingDetail = true
-                } else if availableAmount != "" && payDates != "" {
-                    setPlistProperty(property: ["payDays": payDates, "availableAmount": availableAmount])
+                } else if availableAmount != "" && payDays != "" {
+                    setDefaultInfoForProperty(keyValue: ["availableAmount": availableAmount, "payDays": payDays])
                     showingDetail = true
                 }
             }) {
@@ -127,29 +130,63 @@ struct SettingsView: View {
         }.background(Color.gray).edgesIgnoringSafeArea(.all)
     }
     
-    private func getPlistValue(key: String) -> String {
-        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return "0.0"}
-        let url = URL(fileURLWithPath: path)
-        let data = try! Data(contentsOf: url)
-        guard let plist = try! PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String:String] else {return "0.0"}
-        return (plist[key] ?? "") as String
+    // Write JSON to Documents directory defaults.json file
+    //   Retrieve what's in that file as DefaultInfo object,
+    //   update desired value
+    //   encode to JSON again
+    //   write to file
+    func setDefaultInfoForProperty(keyValue: [String: String]) {
+        var defaultInfo = getDefaultInfo()
+        if keyValue.keys.contains("availableAmount") {
+            print("Attempting to set value for: availableAmount")
+            defaultInfo?.availableAmount = keyValue["availableAmount"]!
+        }
+        
+        if keyValue.keys.contains("payDays") {
+            print("Attempting to set value for: payDays")
+            defaultInfo?.payDays = keyValue["payDays"]!
+        }
+        
+        let url = getDocumentsDirectory().appendingPathComponent("defaults.json")
+        
+        do {
+            let encoder = JSONEncoder()
+            if let jsonData = try? encoder.encode(defaultInfo) {
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    try jsonString.write(to: url, atomically: true, encoding: .utf8)
+                    print("Successfully wrote to defaults.json")
+                }
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+        
     }
     
-    private func setPlistProperty(property: [String: String]) {
-        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return}
-        let url = URL(fileURLWithPath: path)
-        let encoder = PropertyListEncoder()
-        if let data = try? encoder.encode(property) {
-            if FileManager.default.fileExists(atPath: path) {
-                // Update an existing plist
-                try? data.write(to: url)
-                print("Saved to EXISTING Defaults file: \(getPlistValue(key: "availableAmount"))")
-            } else {
-                // Create a new plist
-                FileManager.default.createFile(atPath: path, contents: data, attributes: nil)
-                print("Saved to NEW Defaults file: \(getPlistValue(key: "availableAmount"))")
-            }
+    // Get value from Documents directory defaults.json file
+    func getDefaultInfo() -> DefaultInfo? {
+        
+        let url = getDocumentsDirectory().appendingPathComponent("defaults.json")
+        do {
+            let input = try String(contentsOf: url)
+            let json = input.data(using: .utf8)!
+            let decoder = JSONDecoder()
+            let defaultInfo = try decoder.decode(DefaultInfo.self, from: json)
+            print("Retrieved info from defaults.json: \(defaultInfo.availableAmount), \(defaultInfo.payDays)")
+            return defaultInfo
+        } catch {
+            print(error)
         }
+        
+        return nil
+    }
+    
+    func getDocumentsDirectory() -> URL {
+        // find all possible documents directories for this user
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+
+        // just send back the first one, which ought to be the only one
+        return paths[0]
     }
     
 }

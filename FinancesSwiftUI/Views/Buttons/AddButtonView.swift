@@ -37,29 +37,12 @@ struct AddButtonView: View {
         })
     }
     
-    private func getPlistAvailableAmount() -> String {
-        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return "0.0"}
-        let url = URL(fileURLWithPath: path)
-        let data = try! Data(contentsOf: url)
-        guard let plist = try! PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String:String] else {return "0.0"}
-        return (plist["availableAmount"] ?? "0.00") as String
-    }
-    
-    private func setPlistAvailableAmount(preferences: [String: String]) {
-        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return}
-        let url = URL(fileURLWithPath: path)
-        let encoder = PropertyListEncoder()
-        if let data = try? encoder.encode(preferences) {
-            if FileManager.default.fileExists(atPath: path) {
-                // Update an existing plist
-                try? data.write(to: url)
-                print("Saved to EXISTING Defaults file: \(getPlistAvailableAmount())")
-            } else {
-                // Create a new plist
-                FileManager.default.createFile(atPath: path, contents: data, attributes: nil)
-                print("Saved to NEW Defaults file: \(getPlistAvailableAmount())")
-            }
-        }
+    func getDocumentsDirectory() -> URL {
+        // find all possible documents directories for this user
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+
+        // just send back the first one, which ought to be the only one
+        return paths[0]
     }
 }
 

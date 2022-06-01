@@ -83,12 +83,12 @@ struct HeaderView: View {
     
     // Returns format like ["1", "15"]
     private func getPayDays() -> [String] {
-        let payDaysString = getPlistValue(key: "payDays")
+        let payDaysString = getDefaultInfo()?.payDays
         var payDaysArray: [String] = []
-        if payDaysString.contains(",") {
-            payDaysArray = payDaysString.components(separatedBy: ",")
+        if payDaysString!.contains(",") {
+            payDaysArray = payDaysString!.components(separatedBy: ",")
         } else {
-            payDaysArray = [payDaysString]
+            payDaysArray = [payDaysString!]
         }
         return payDaysArray
     }
@@ -161,21 +161,13 @@ struct HeaderView: View {
     private func getRemaining() -> Double {
         let totalExp = getTotal()
         
-        let plistAvailAmount = getPlistValue(key: "availableAmount")
-        print("Got from plist: \(plistAvailAmount)")
-        guard let availableAmt = Double(plistAvailAmount) else {return 0.0}
+        let storedAvailAmount = getDefaultInfo()?.availableAmount
+        print("Got availAmount from storage: \(storedAvailAmount!)")
+        guard let availableAmt = Double(storedAvailAmount!) else {return 0.0}
         
         let difference: Double = availableAmt - totalExp
         
         return difference
-    }
-    
-    private func getPlistValue(key: String) -> String {
-        guard let path = Bundle.main.path(forResource: "Defaults", ofType: "plist") else {return "0.0"}
-        let url = URL(fileURLWithPath: path)
-        let data = try! Data(contentsOf: url)
-        guard let plist = try! PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String:String] else {return "0.0"}
-        return (plist[key] ?? "") as String
     }
     
     private func getTotal() -> Double {
@@ -197,6 +189,32 @@ struct HeaderView: View {
         
         // Convert Date to String
         return dateFormatter.string(from: date)
+    }
+    
+    // Get value from Documents directory defaults.json file
+    func getDefaultInfo() -> DefaultInfo? {
+        
+        let url = getDocumentsDirectory().appendingPathComponent("defaults.json")
+        do {
+            let input = try String(contentsOf: url)
+            let json = input.data(using: .utf8)!
+            let decoder = JSONDecoder()
+            let defaultInfo = try decoder.decode(DefaultInfo.self, from: json)
+            print("Retrieved info from defaults.json: \(defaultInfo.availableAmount), \(defaultInfo.payDays)")
+            return defaultInfo
+        } catch {
+            print(error)
+        }
+        
+        return nil
+    }
+    
+    func getDocumentsDirectory() -> URL {
+        // find all possible documents directories for this user
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+
+        // just send back the first one, which ought to be the only one
+        return paths[0]
     }
 }
 
