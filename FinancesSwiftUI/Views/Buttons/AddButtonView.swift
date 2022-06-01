@@ -30,7 +30,7 @@ struct AddButtonView: View {
                     .foregroundColor(buttonText == "add" ? Color.black : Color.gray)
             }
         }.sheet(isPresented: $addItemScreenIsShowing, onDismiss: {}, content: {
-            AddItemView()
+            AddItemView(startCategory: "Grocery")
         })
         .sheet(isPresented: $settingsScreenIsShowing, onDismiss: {}, content: {
             SettingsView()

@@ -82,7 +82,7 @@ struct CategoryView: View {
                             .padding(.trailing, 30)
                             .edgesIgnoringSafeArea(.all)
                     }.sheet(isPresented: $addItemScreenIsShowing, onDismiss: {}, content: {
-                        AddItemView()
+                        AddItemView(startCategory: category)
                     })
                     Spacer()
                 }

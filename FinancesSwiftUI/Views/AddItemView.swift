@@ -20,9 +20,12 @@ struct AddItemView: View {
     @State private var showingSuccessfulAlert = false
     let categories = ["Drinks", "Food", "Grocery", "Transport", "Misc"]
     
-    init() {
+    var startCat: String
+    
+    init(startCategory: String? = "Drinks") {
         UITextField.appearance().backgroundColor = .lightGray
         UITextField.appearance().textColor = .white
+        startCat = startCategory!
     }
     
     var body: some View {
@@ -64,6 +67,8 @@ struct AddItemView: View {
                         Spacer()
                     }
                 }
+            }.onAppear {
+                category = startCat
             }
             .pickerStyle(WheelPickerStyle())
             .background(Color.gray)
