@@ -39,12 +39,12 @@ struct SettingsView: View {
                     .foregroundColor(Color.white)
                     .padding()
             }
-            Spacer()
             HStack {
                 Text("Available Amount: $")
                     .bold()
                     .font(.headline)
                     .padding(.leading)
+                    .padding(.top, 50)
                     .foregroundColor(Color.white)
                 TextField(
                     getDefaultInfo()!.availableAmount,
@@ -55,6 +55,7 @@ struct SettingsView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .foregroundColor(Color.white)
                 .padding(.trailing)
+                .padding(.top, 50)
                 .font(.title2)
             }
             HStack {
@@ -75,7 +76,6 @@ struct SettingsView: View {
                 .padding(.trailing)
                 .font(.title2)
             }
-            Spacer()
             // Add Item Button
             Button(action: {
                 if availableAmount == "" && payDays == "" {
@@ -127,6 +127,8 @@ struct SettingsView: View {
                 })
             }
             .padding(.bottom, 50)
+            .padding(.top, 50)
+            Spacer()
         }.background(Color.gray).edgesIgnoringSafeArea(.all)
     }
     

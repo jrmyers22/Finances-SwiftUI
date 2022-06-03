@@ -80,6 +80,7 @@ struct AddItemView: View {
                     .bold()
                     .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
                     .foregroundColor(Color.white)
+                
                 TextField(
                     "",
                     text: $amount
@@ -92,7 +93,15 @@ struct AddItemView: View {
                 .foregroundColor(Color.white)
                 .padding(.leading, -5)
                 .font(.title)
-            }
+                
+                Button(action: {
+                    hideKeyboard()
+                }) {
+                    Text("☑️")
+                        .font(.title)
+                        .padding(.leading)
+                }
+            }.padding(.leading, Constants.Views.SCREEN_WIDTH * 0.1)
             
             Spacer()
             
@@ -185,7 +194,6 @@ extension View {
 
 struct AddItemView_Previews: PreviewProvider {
     static var previews: some View {
-        AddItemView()
         AddItemView()
             .preferredColorScheme(.dark)
     }

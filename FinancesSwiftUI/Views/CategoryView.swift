@@ -51,13 +51,12 @@ struct CategoryView: View {
                         }.onDelete(perform: deleteExpItems)
                         .alert(isPresented: $showingDeleteAllAlert) {
                             Alert(
-                                title: Text("Delete All Expenses?"),
-                                message: Text("Only available on the \"Total\" screen."),
-                                primaryButton: .cancel(),
-                                secondaryButton: .destructive(Text("Delete All")) {
+                                title: Text("Delete ALL Expenses?"),
+                                primaryButton: .destructive(Text("Delete All")) {
                                     print("Deleting all...")
                                     deleteAllItems()
-                                }
+                                },
+                                secondaryButton: .cancel()
                             )
                         }
                         //                    if !categoryItemsExist {
