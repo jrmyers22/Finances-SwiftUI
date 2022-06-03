@@ -37,7 +37,8 @@ struct ExpenseRowView: View {
         }.background(
             RoundedRectangle(cornerRadius: 10)
                 .strokeBorder(accentColor.opacity(0.4), lineWidth: 2)
-                .frame(width: 350, height: 60)
+                .frame(width: Constants.Views.SCREEN_WIDTH * 0.9,
+                       height: Constants.Views.SCREEN_HEIGHT * 0.07)
                 .padding(7)
                 .background(Color.white).edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
         ).foregroundColor(Color.black).background(Color.white).edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
@@ -46,6 +47,7 @@ struct ExpenseRowView: View {
 
 //struct ExpenseRowView_Previews: PreviewProvider {
 //    static var previews: some View {
-//        ExpenseRowView(expense: ExpItem)
+//
+//        ExpenseRowView(accentColor: Color.green, expense: ExpItem())
 //    }
 //}
