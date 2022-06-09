@@ -28,6 +28,7 @@ struct ExpenseRowView: View {
                     .font(.title2)
                     .padding(.top)
                     .padding(.bottom)
+                    .lineLimit(1)
             }
             Spacer()
             Text("$\(expense.expAmount!)")

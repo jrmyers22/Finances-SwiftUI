@@ -25,111 +25,138 @@ struct SettingsView: View {
     @State private var payDays: String = ""
     @State private var isEditingPayDates = false
     
+    // Unicorn easter egg
+    @State private var angle = 0.0
+    @State private var xPos = Constants.Views.SCREEN_WIDTH * 1.5
+    @State private var yPos = Constants.Views.SCREEN_HEIGHT * 0.2
+    @State private var showUnicorn = true
+    @State private var randomizePlacement = true
+    @State private var yPosOptionsList = [Constants.Views.SCREEN_HEIGHT * 0.2, Constants.Views.SCREEN_HEIGHT * 0.45, Constants.Views.SCREEN_HEIGHT * 0.65]
+    
     init() {
         UITextField.appearance().backgroundColor = .lightGray
         UITextField.appearance().textColor = .white
     }
     
     var body: some View {
-        VStack {
-            ZStack {
-                Text("Settings")
-                    .font(.largeTitle)
-                    .fontWeight(.black)
-                    .foregroundColor(Color.white)
-                    .padding()
-            }
-            HStack {
-                Text("Available Amount: $")
-                    .bold()
-                    .font(.headline)
-                    .padding(.leading)
-                    .padding(.top, 50)
-                    .foregroundColor(Color.white)
-                TextField(
-                    getDefaultInfo()!.availableAmount,
-                    text: $availableAmount
-                ) { isEditing in
-                    self.isEditingAvailAmt = isEditing
-                } onCommit: {}
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(Color.white)
-                .padding(.trailing)
-                .padding(.top, 50)
-                .font(.title2)
-            }
-            HStack {
-                Text("Pay Dates:                  ")
-                    .bold()
-                    .font(.headline)
-                    .padding(.leading)
-                    .foregroundColor(Color.white)
-                Spacer()
-                TextField(
-                    "ex. 1st, 15th = 1,15",
-                    text: $payDays
-                ) { isEditing in
-                    self.isEditingPayDates = isEditing
-                } onCommit: {}
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(Color.white)
-                .padding(.trailing)
-                .font(.title2)
-            }
-            // Add Item Button
-            Button(action: {
-                if availableAmount == "" && payDays == "" {
-                    showingIncompleteAlert = true
-                } else if !availableAmount.allSatisfy({ $0.isNumber }) {
-                    showingInvalidAvailAmountAlert = true
-                } else if !payDays.allSatisfy({ $0.isNumber || $0 == "," }) {
-                    // Anything other than a number or a comma
-                    showingInvalidPayDatesAlert = true
-                } else if availableAmount != "" && payDays == "" {
-                    setDefaultInfoForProperty(keyValue: ["availableAmount": availableAmount])
-                    // Show successful alert
-                    showingDetail = true
-                } else if availableAmount == "" && payDays != "" {
-                    setDefaultInfoForProperty(keyValue: ["payDays": payDays])
-                    showingDetail = true
-                } else if availableAmount != "" && payDays != "" {
-                    setDefaultInfoForProperty(keyValue: ["availableAmount": availableAmount, "payDays": payDays])
-                    showingDetail = true
+        ZStack {
+            VStack {
+                ZStack {
+                    Text("Settings")
+                        .font(.largeTitle)
+                        .fontWeight(.black)
+                        .foregroundColor(Color.white)
+                        .padding()
+                        .onTapGesture(count: 2, perform: {
+                            print("show unicorn")
+                            if showUnicorn {
+                                angle -= 35
+                                xPos = Constants.Views.SCREEN_WIDTH * 0.9
+                            } else {
+                                angle += 35
+                                xPos = Constants.Views.SCREEN_WIDTH * 1.5
+                            }
+                            showUnicorn.toggle()
+                        })
                 }
-            }) {
-                Text("Update")
-                    .bold()
-                    .font(.title3)
+                HStack {
+                    Text("Available Amount: $")
+                        .bold()
+                        .font(.headline)
+                        .padding(.leading)
+                        .padding(.top, 50)
+                        .foregroundColor(Color.white)
+                    TextField(
+                        getDefaultInfo()!.availableAmount,
+                        text: $availableAmount
+                    ) { isEditing in
+                        self.isEditingAvailAmt = isEditing
+                    } onCommit: {}
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .foregroundColor(Color.white)
+                        .padding(.trailing)
+                        .padding(.top, 50)
+                        .font(.title2)
+                }
+                HStack {
+                    Text("Pay Dates:                  ")
+                        .bold()
+                        .font(.headline)
+                        .padding(.leading)
+                        .foregroundColor(Color.white)
+                    Spacer()
+                    TextField(
+                        "ex. 1st, 15th = 1,15",
+                        text: $payDays
+                    ) { isEditing in
+                        self.isEditingPayDates = isEditing
+                    } onCommit: {}
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .foregroundColor(Color.white)
+                        .padding(.trailing)
+                        .font(.title2)
+                }
+                // Add Item Button
+                Button(action: {
+                    if availableAmount == "" && payDays == "" {
+                        showingIncompleteAlert = true
+                    } else if !availableAmount.allSatisfy({ $0.isNumber }) {
+                        showingInvalidAvailAmountAlert = true
+                    } else if !payDays.allSatisfy({ $0.isNumber || $0 == "," }) {
+                        // Anything other than a number or a comma
+                        showingInvalidPayDatesAlert = true
+                    } else if availableAmount != "" && payDays == "" {
+                        setDefaultInfoForProperty(keyValue: ["availableAmount": availableAmount])
+                        // Show successful alert
+                        showingDetail = true
+                    } else if availableAmount == "" && payDays != "" {
+                        setDefaultInfoForProperty(keyValue: ["payDays": payDays])
+                        showingDetail = true
+                    } else if availableAmount != "" && payDays != "" {
+                        setDefaultInfoForProperty(keyValue: ["availableAmount": availableAmount, "payDays": payDays])
+                        showingDetail = true
+                    }
+                }) {
+                    Text("Update")
+                        .bold()
+                        .font(.title3)
                     
-                    .padding(20.0)
-                    .background(
-                        Color.green
-                    )
-                    .foregroundColor(Color.white)
-                    .cornerRadius(20)
-            }
-            .alert(isPresented: $showingIncompleteAlert) {
-                Alert(title: Text("Not so fast!"), message: Text("Either available amount or pay dates must be filled in."), dismissButton: .default(Text("Gotcha")))
-            }
-            .alert(isPresented: $showingInvalidAvailAmountAlert) {
-                Alert(title: Text("Not so fast!"), message: Text("Available Amount should only include numbers, no other characters."), dismissButton: .default(Text("Gotcha")))
-            }
-            .alert(isPresented: $showingInvalidPayDatesAlert) {
-                Alert(title: Text("Not so fast!"), message: Text("Pay dates should be numbers (dates) separated by commas. For example, if you get paid on the 1st and 15th you would enter \"1,15\""), dismissButton: .default(Text("Gotcha")))
-            }
-            .alert(isPresented: $showingDetail) {
-                
-                return availableAmount != "" ? Alert(title: Text("Value Updated"), message: Text("Tap the \"Available\" text for the number to refresh"), dismissButton: .default(Text("Gotcha")) {
-                    presentationMode.wrappedValue.dismiss()
-                }) : Alert(title: Text("Value Updated"), message: Text("Pay Dates refreshed."), dismissButton: .default(Text("Gotcha")) {
+                        .padding(20.0)
+                        .background(
+                            Color.green
+                        )
+                        .foregroundColor(Color.white)
+                        .cornerRadius(20)
+                }
+                .alert(isPresented: $showingIncompleteAlert) {
+                    Alert(title: Text("Not so fast!"), message: Text("Either available amount or pay dates must be filled in."), dismissButton: .default(Text("Gotcha")))
+                }
+                .alert(isPresented: $showingInvalidAvailAmountAlert) {
+                    Alert(title: Text("Not so fast!"), message: Text("Available Amount should only include numbers, no other characters."), dismissButton: .default(Text("Gotcha")))
+                }
+                .alert(isPresented: $showingInvalidPayDatesAlert) {
+                    Alert(title: Text("Not so fast!"), message: Text("Pay dates should be numbers (dates) separated by commas. For example, if you get paid on the 1st and 15th you would enter \"1,15\""), dismissButton: .default(Text("Gotcha")))
+                }
+                .alert(isPresented: $showingDetail) {
                     
-                    presentationMode.wrappedValue.dismiss()
-                })
-            }
-            .padding(.bottom, 50)
-            .padding(.top, 50)
-            Spacer()
-        }.background(Color.gray).edgesIgnoringSafeArea(.all)
+                    return availableAmount != "" ? Alert(title: Text("Value Updated"), message: Text("Tap the \"Available\" text for the number to refresh"), dismissButton: .default(Text("Gotcha")) {
+                        presentationMode.wrappedValue.dismiss()
+                    }) : Alert(title: Text("Value Updated"), message: Text("Pay Dates refreshed."), dismissButton: .default(Text("Gotcha")) {
+                        
+                        presentationMode.wrappedValue.dismiss()
+                    })
+                }
+                .padding(.bottom, 50)
+                .padding(.top, 50)
+                Spacer()
+            }.background(Color.gray).edgesIgnoringSafeArea(.all)
+            Image("unicorn")
+                .resizable()
+                .frame(width: Constants.Views.SCREEN_WIDTH * 0.6, height: Constants.Views.SCREEN_HEIGHT * 0.4, alignment: .center)
+                .rotationEffect(.degrees(angle))
+                .animation(.easeIn, value: angle)
+                .position(x: xPos, y: randomizePlacement ? yPosOptionsList.randomElement()! : yPos)
+        }
     }
     
     // Write JSON to Documents directory defaults.json file
@@ -186,11 +213,10 @@ struct SettingsView: View {
     func getDocumentsDirectory() -> URL {
         // find all possible documents directories for this user
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-
+        
         // just send back the first one, which ought to be the only one
         return paths[0]
     }
-    
 }
 
 struct SettingsView_Previews: PreviewProvider {

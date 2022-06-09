@@ -49,19 +49,6 @@ struct CategoryView: View {
                                 ExpenseRowView(accentColor: decideColor(category: expItems[i].expCategory!), expense: expItems[i])
                             }
                         }.onDelete(perform: deleteExpItems)
-                        .alert(isPresented: $showingDeleteAllAlert) {
-                            Alert(
-                                title: Text("Delete ALL Expenses?"),
-                                primaryButton: .destructive(Text("Delete All")) {
-                                    print("Deleting all...")
-                                    deleteAllItems()
-                                },
-                                secondaryButton: .cancel()
-                            )
-                        }
-                        //                    if !categoryItemsExist {
-                        //                        Text("No items!")
-                        //                    }
                     }
                     .navigationBarTitle("")
                     .navigationBarHidden(true)
