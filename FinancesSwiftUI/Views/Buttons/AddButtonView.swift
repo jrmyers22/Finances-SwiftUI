@@ -24,10 +24,14 @@ struct AddButtonView: View {
             ZStack {
                 Circle()
                     .strokeBorder(buttonText == "add" ? Color.black : Color.gray, lineWidth: 2)
-                    .frame(width: 90, height: 90)
-                Text(buttonText)
-                    .font(.title2)
+                    .frame(width: 60, height: 60)
+//                Text(buttonText)
+//                    .font(.title2)
+//                    .foregroundColor(buttonText == "add" ? Color.black : Color.gray)
+                Image(systemName: "plus")
+                    .resizable()
                     .foregroundColor(buttonText == "add" ? Color.black : Color.gray)
+                    .frame(width: 35, height: 35)
             }
         }.sheet(isPresented: $addItemScreenIsShowing, onDismiss: {}, content: {
             AddItemView(startCategory: "Grocery")

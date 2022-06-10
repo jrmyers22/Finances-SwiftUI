@@ -46,7 +46,7 @@ struct SettingsView: View {
                         .font(.largeTitle)
                         .fontWeight(.black)
                         .foregroundColor(Color.white)
-                        .padding()
+                        .padding(.top, Constants.Views.SCREEN_HEIGHT * 0.05)
                         .onTapGesture(count: 2, perform: {
                             print("show unicorn")
                             if showUnicorn {
@@ -60,7 +60,7 @@ struct SettingsView: View {
                         })
                 }
                 HStack {
-                    Text("Available Amount: $")
+                    Text("Starting Amount: $")
                         .bold()
                         .font(.headline)
                         .padding(.leading)
@@ -77,6 +77,7 @@ struct SettingsView: View {
                         .padding(.trailing)
                         .padding(.top, 50)
                         .font(.title2)
+                        .frame(width: Constants.Views.SCREEN_WIDTH * 0.55, height: Constants.Views.SCREEN_HEIGHT * 0.05, alignment: .center)
                 }
                 HStack {
                     Text("Pay Dates:                  ")
@@ -88,13 +89,15 @@ struct SettingsView: View {
                     TextField(
                         "ex. 1st, 15th = 1,15",
                         text: $payDays
-                    ) { isEditing in
+                    )
+                    { isEditing in
                         self.isEditingPayDates = isEditing
                     } onCommit: {}
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .foregroundColor(Color.white)
                         .padding(.trailing)
                         .font(.title2)
+                    .frame(width: Constants.Views.SCREEN_WIDTH * 0.55, height: Constants.Views.SCREEN_HEIGHT * 0.05, alignment: .center)
                 }
                 // Add Item Button
                 Button(action: {
