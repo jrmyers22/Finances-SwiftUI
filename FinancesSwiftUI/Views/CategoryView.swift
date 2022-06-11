@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+//struct previousExpenses: Codable {
+//
+//}
+
 struct CategoryView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
@@ -15,6 +19,7 @@ struct CategoryView: View {
     
     @State private var addItemScreenIsShowing = false
     @State var showingDeleteAllAlert = false
+    @State var showingSaveToHistoryAlert = false
     
     var categoryItemsExist = false
     
@@ -28,7 +33,6 @@ struct CategoryView: View {
     }
     
     var body: some View {
-        
         let accentColor = decideColor(category: category)
         ZStack {
             VStack {
@@ -57,20 +61,34 @@ struct CategoryView: View {
             }.padding(.top, 30).background(accentColor).edgesIgnoringSafeArea(.all)
             HStack {
                 Spacer()
-                VStack {
-                    Button(action: {
-                        addItemScreenIsShowing = true
-                    }) {
-                        Text("+")
-                            .font(.largeTitle)
-                            .foregroundColor(Color.white)
-                            .padding(.top, 30)
-                            .padding(.trailing, 30)
-                            .edgesIgnoringSafeArea(.all)
-                    }.sheet(isPresented: $addItemScreenIsShowing, onDismiss: {}, content: {
-                        AddItemView(startCategory: category)
-                    })
-                    Spacer()
+                if category == "Total" {
+                    VStack {
+                        // Show the Save button
+                        Button(action: {
+                            // Show an alert which asks if they want to
+                            //     save to the History view
+                            showingSaveToHistoryAlert = true
+                        }) {
+                            Image(systemName: "tag")
+                                .resizable()
+                                .frame(width: Constants.Views.SCREEN_WIDTH * 0.075, height: Constants.Views.SCREEN_WIDTH * 0.075, alignment: .center)
+                                .foregroundColor(Color.white)
+                                .padding(.top, 40)
+                                .padding(.trailing, 30)
+                        }.alert(isPresented: $showingSaveToHistoryAlert) {
+                            Alert(title: Text("Save to History?"),
+                                  message: Text("This date range will be available in the \"History\" tab."),
+                                  primaryButton: .default(Text("Save"), action: {
+                                print("Saving all expenses to file")
+                                updatePreviousExpenses()
+                            }),
+                                  secondaryButton: .cancel(Text("Cancel")))
+                        }
+                        Spacer()
+                    }
+                } else {
+                    // Show the Add button
+                    AddButton(category: category)
                 }
             }
         }
@@ -103,6 +121,117 @@ struct CategoryView: View {
             }
         }
     }
+    
+    // Get existing expItems
+    // Write them to a JSON array
+    // Get the existing previous-expenses.json
+    // If nil,
+    //    add JSON array to a parent array called "previous-expenses"
+    //    write "previous-expenses" to file
+    // else
+    //    get the parent array "previous-expenses"
+    //    serialize into a swift array
+    //    add the existing expItems JSON array to the previous-expenses array
+    //    write "previous-expenses to file
+    func updatePreviousExpenses() {
+        // Get existing expItems, write them to a JSON array
+        var expenseItemsAsJSON: [String: Any] = [:]
+        for expense in expItems {
+            var expenseItem: [String: String] = [:]
+            expenseItem["expAmount"] = expense.expAmount
+            expenseItem["expCategory"] = expense.expCategory
+            
+//            let dateFormatter = DateFormatter()
+//            dateFormatter.dateFormat = "MM/dd/yyyy"
+//            let result = dateFormatter.string(from: expense.expDate!)
+            expenseItem["expDate"] = String(describing: expense.expDate!)
+            
+            expenseItem["expDesc"] = expense.expDesc
+//            expenseItemsAsJSON.append(expenseItem)
+            expenseItemsAsJSON["\(String(describing: expense.expDate!))"] = expenseItem
+        }
+        
+        // Get the existing previous-expenses.json
+        var prevExpenses = getPreviousExpenses()
+        var prevExpensesJSON: [String: Any] = [:]
+        if prevExpenses.isEmpty {
+            // If nil,
+            //    add JSON array to a parent array called "previous-expenses"
+            //    write "previous-expenses" to file
+            prevExpensesJSON["previousExpenses"] = [expenseItemsAsJSON]
+        } else {
+            //    get the parent array "previous-expenses"
+            //    serialize into a swift array
+            //    add the existing expItems JSON array to the previous-expenses array
+            //    write "previous-expenses to file
+            var existingList: [Any] = prevExpenses["previousExpenses"]!
+            existingList.append(expenseItemsAsJSON)
+            prevExpenses["previousExpenses"] = existingList
+        }
+        
+        let url = getDocumentsDirectory().appendingPathComponent("previous-expenses.json")
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: prevExpensesJSON, options: [])
+            let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
+            print("JSON STRING:")
+            print (jsonString)
+            try jsonString.write(to: url, atomically: true, encoding: .utf8)
+            print("Successfully wrote to previous-expenses.json")
+        } catch {
+            let error = error as NSError?
+            fatalError("Unresolved Error: \(String(describing: error))")
+        }
+    }
+    
+    // Get value from Documents directory defaults.json file
+    func getPreviousExpenses() -> [String: [Any]] {
+        print("Retrieving expenses from previous-expenses.json")
+        let url = getDocumentsDirectory().appendingPathComponent("previous-expenses.json")
+        do {
+            let input = try String(contentsOf: url)
+            let json = input.data(using: .utf8)!
+            let decoder = JSONDecoder()
+            let previousExpenses = try decoder.decode([String:[[String: PreviousExpense]]].self, from: json)
+            print(previousExpenses)
+            return previousExpenses
+        } catch {
+            print("Error reading from the previous-expenses.json file")
+            print(error)
+        }
+        
+        return [:]
+    }
+    
+    func getDocumentsDirectory() -> URL {
+        // find all possible documents directories for this user
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        
+        // just send back the first one, which ought to be the only one
+        return paths[0]
+    }
+}
+
+struct AddButton: View {
+    @State private var addItemScreenIsShowing = false
+    var category: String!
+    
+    var body: some View {
+        VStack {
+            Button(action: {
+                addItemScreenIsShowing = true
+            }) {
+                Text("+")
+                    .font(.largeTitle)
+                    .foregroundColor(Color.white)
+                    .padding(.top, 30)
+                    .padding(.trailing, 30)
+                    .edgesIgnoringSafeArea(.all)
+            }.sheet(isPresented: $addItemScreenIsShowing, onDismiss: {}, content: {
+                AddItemView(startCategory: category)
+            })
+            Spacer()
+        }
+    }
 }
 
 func decideColor(category: String) -> Color {
@@ -126,6 +255,6 @@ func decideColor(category: String) -> Color {
 
 struct CategoryView_Previews: PreviewProvider {
     static var previews: some View {
-        CategoryView(category: "Drinks")
+        CategoryView(category: "Total")
     }
 }

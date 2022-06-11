@@ -36,7 +36,6 @@ struct ContentView: View {
                 // Top information
                 HeaderView().padding(.top, 30)
                 
-                
                 // All Buttons
                 VStack{
                     // First Row of Buttons
@@ -69,8 +68,9 @@ struct ContentView: View {
 //                    AddButtonView(buttonText: "settings")
                     Spacer()
                     AddButtonView(buttonText: "add")
-                    Spacer()
+                        .padding(.trailing, Constants.Views.SCREEN_WIDTH * 0.15)
                 }
+                .padding(.bottom)
                 Spacer()
             }
             .tabItem {

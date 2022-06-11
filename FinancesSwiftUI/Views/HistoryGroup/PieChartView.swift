@@ -32,7 +32,7 @@ public struct PieChartView: View {
         return tempSlices
     }
     
-    public init(values:[Double], names: [String], formatter: @escaping (Double) -> String, colors: [Color] = [Color.blue, Color.green, Color.orange], widthFraction: CGFloat = 0.75, innerRadiusFraction: CGFloat = 0.60){
+    public init(values:[Double], names: [String], formatter: @escaping (Double) -> String, colors: [Color] = [Color("FoodCategoryColor"), Color("DrinkCategoryColor"), Color("GroceryCategoryColor"), Color("TransportationCategoryColor"), Color("MiscCategoryColor")], widthFraction: CGFloat = 0.75, innerRadiusFraction: CGFloat = 0.60){
         self.values = values
         self.names = names
         self.formatter = formatter
@@ -49,36 +49,8 @@ public struct PieChartView: View {
                 ZStack{
                     ForEach(0..<self.values.count){ i in
                         PieSlice(pieSliceData: self.slices[i])
-                            .scaleEffect(self.activeIndex == i ? 1.03 : 1)
-                            .animation(Animation.spring())
                     }
                     .frame(width: widthFraction * Constants.Views.SCREEN_WIDTH, height: widthFraction * Constants.Views.SCREEN_WIDTH)
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                let radius = 0.5 * widthFraction * Constants.Views.SCREEN_WIDTH
-                                let diff = CGPoint(x: value.location.x - radius, y: radius - value.location.y)
-                                let dist = pow(pow(diff.x, 2.0) + pow(diff.y, 2.0), 0.5)
-                                if (dist > radius || dist < radius * innerRadiusFraction) {
-                                    self.activeIndex = -1
-                                    return
-                                }
-                                var radians = Double(atan2(diff.x, diff.y))
-                                if (radians < 0) {
-                                    radians = 2 * Double.pi + radians
-                                }
-                                
-                                for (i, slice) in slices.enumerated() {
-                                    if (radians < slice.endAngle.radians) {
-                                        self.activeIndex = i
-                                        break
-                                    }
-                                }
-                            }
-                            .onEnded { value in
-                                self.activeIndex = -1
-                            }
-                    )
                     Circle()
                         .frame(width: widthFraction * Constants.Views.SCREEN_WIDTH * innerRadiusFraction, height: widthFraction * Constants.Views.SCREEN_WIDTH)
                     
@@ -101,7 +73,7 @@ public struct PieChartView: View {
 
 struct PieChartView_Previews: PreviewProvider {
     static var previews: some View {
-        PieChartView(values: [1300, 500, 300], names: ["Rent", "Transport", "Education"], formatter: {value in String(format: "$%.2f", value)})
+        PieChartView(values: [1300, 500, 300, 100, 200], names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
     }
 }
 

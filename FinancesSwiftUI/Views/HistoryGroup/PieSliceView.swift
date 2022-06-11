@@ -32,7 +32,7 @@ struct PieSlice: View {
                 }
                 .fill(pieSliceData.color)
                 
-                Text(pieSliceData.text)
+                Text(pieSliceData.text! == "0%" ? "" : pieSliceData.text!)
                     .position(
                         x: geometry.size.width * 0.5 * CGFloat(1.0 + 0.78 * cos(self.midRadians)),
                         y: geometry.size.height * 0.5 * CGFloat(1.0 - 0.78 * sin(self.midRadians))
@@ -47,12 +47,12 @@ struct PieSlice: View {
 struct PieSliceData {
     var startAngle: Angle
     var endAngle: Angle
-    var text: String
+    var text: String?
     var color: Color
 }
 
 struct PieSlice_Previews: PreviewProvider {
     static var previews: some View {
-        PieSlice(pieSliceData: PieSliceData(startAngle: Angle(degrees: 0.0), endAngle: Angle(degrees: 120.0), text: "30%", color: Color.black))
+        PieSlice(pieSliceData: PieSliceData(startAngle: Angle(degrees: 0.0), endAngle: Angle(degrees: 120.0), color: Color.black))
     }
 }
