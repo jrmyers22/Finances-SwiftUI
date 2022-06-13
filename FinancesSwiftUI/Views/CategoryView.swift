@@ -7,15 +7,13 @@
 
 import SwiftUI
 
-//struct previousExpenses: Codable {
-//
-//}
-
 struct CategoryView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
+    
+    @EnvironmentObject var numLogsThisSession: NumLogsThisSession
     
     @State private var addItemScreenIsShowing = false
     @State var showingDeleteAllAlert = false
@@ -67,7 +65,9 @@ struct CategoryView: View {
                         Button(action: {
                             // Show an alert which asks if they want to
                             //     save to the History view
-                            showingSaveToHistoryAlert = true
+                            if expItems.count > 0 {
+                                showingSaveToHistoryAlert = true
+                            }
                         }) {
                             Image(systemName: "tag")
                                 .resizable()
@@ -80,6 +80,7 @@ struct CategoryView: View {
                                   message: Text("This date range will be available in the \"History\" tab."),
                                   primaryButton: .default(Text("Save"), action: {
                                 print("Saving all expenses to file")
+                                numLogsThisSession.count += 1
                                 updatePreviousExpenses()
                             }),
                                   secondaryButton: .cancel(Text("Cancel")))
@@ -134,6 +135,7 @@ struct CategoryView: View {
     //    add the existing expItems JSON array to the previous-expenses array
     //    write "previous-expenses to file
     func updatePreviousExpenses() {
+        print("UPDATING previous expenses json")
         // Get existing expItems, write them to a JSON array
         var expenseItemsAsJSON: [String: Any] = [:]
         for expense in expItems {
@@ -153,6 +155,11 @@ struct CategoryView: View {
         
         // Get the existing previous-expenses.json
         var prevExpenses = getPreviousExpenses()
+        
+//        let jsonEncoder = JSONEncoder()
+//        let jsonData = try jsonEncoder.encode(prevExpenses["previousExpenses"])
+//        let json = String(data: jsonData, encoding: String.Encoding.utf16)
+        
         var prevExpensesJSON: [String: Any] = [:]
         if prevExpenses.isEmpty {
             // If nil,
@@ -160,17 +167,14 @@ struct CategoryView: View {
             //    write "previous-expenses" to file
             prevExpensesJSON["previousExpenses"] = [expenseItemsAsJSON]
         } else {
-            //    get the parent array "previous-expenses"
-            //    serialize into a swift array
-            //    add the existing expItems JSON array to the previous-expenses array
-            //    write "previous-expenses to file
             var existingList: [Any] = prevExpenses["previousExpenses"]!
             existingList.append(expenseItemsAsJSON)
-            prevExpenses["previousExpenses"] = existingList
+            prevExpensesJSON["previousExpenses"] = existingList
         }
         
         let url = getDocumentsDirectory().appendingPathComponent("previous-expenses.json")
         do {
+            print("Serializing JSON data...")
             let jsonData = try JSONSerialization.data(withJSONObject: prevExpensesJSON, options: [])
             let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
             print("JSON STRING:")
@@ -188,12 +192,16 @@ struct CategoryView: View {
         print("Retrieving expenses from previous-expenses.json")
         let url = getDocumentsDirectory().appendingPathComponent("previous-expenses.json")
         do {
-            let input = try String(contentsOf: url)
-            let json = input.data(using: .utf8)!
-            let decoder = JSONDecoder()
-            let previousExpenses = try decoder.decode([String:[[String: PreviousExpense]]].self, from: json)
-            print(previousExpenses)
-            return previousExpenses
+            let data = try Data(contentsOf: url, options: .mappedIfSafe)
+            let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
+            let jsonResult2 = jsonResult as? [String: [Any]] ?? [:]
+                
+//            let input = try String(contentsOf: url)
+//            let json = input.data(using: .utf8)!
+//            let decoder = JSONDecoder()
+//            var previousExpenses = try decoder.decode([String:[[String: PreviousExpense]]].self, from: json)
+//            print(previousExpenses)
+            return jsonResult2
         } catch {
             print("Error reading from the previous-expenses.json file")
             print(error)
@@ -253,8 +261,8 @@ func decideColor(category: String) -> Color {
     return accentColor
 }
 
-struct CategoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        CategoryView(category: "Total")
-    }
-}
+//struct CategoryView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        CategoryView(category: "Total")
+//    }
+//}

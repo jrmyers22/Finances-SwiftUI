@@ -16,7 +16,7 @@ struct CardWithPieChart: View {
     var expenses: [[String: PreviousExpense]]
     
     var body: some View {
-        ForEach(0..<expenses.count) { _ in
+        ForEach(0..<expenses.count) { idx in
             Button(action: {
                 historyItemScreenIsShowing = true
             }) {
@@ -28,13 +28,13 @@ struct CardWithPieChart: View {
                         .padding(.top, Constants.Views.SCREEN_HEIGHT * 0.4)
                         .foregroundColor(Color.gray)
                     
-                    PieChartView(values: getTotalsPerCategory(), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
+                    PieChartView(values: getTotalsPerCategory(idx: idx), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
                         .frame(width: Constants.Views.SCREEN_WIDTH * 0.8, height: Constants.Views.SCREEN_HEIGHT * 0.4, alignment: .center)
                         .padding(.bottom, Constants.Views.SCREEN_HEIGHT * 0.1)
                     
                 }.frame(width: Constants.Views.SCREEN_WIDTH * 0.9, height: Constants.Views.SCREEN_HEIGHT * 0.5, alignment: .center)
             }.sheet(isPresented: $historyItemScreenIsShowing, onDismiss: {}, content: {
-                PieChartWithList(values: getTotalsPerCategory(), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
+                PieChartWithList(values: getTotalsPerCategory(idx: idx), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
             })
         }
     }
@@ -48,27 +48,43 @@ struct CardWithPieChart: View {
         return ""
     }
     
-    func getTotalsPerCategory() -> [Double] {
+    func getTotalsPerCategory(idx: Int) -> [Double] {
         var foodTotal: Double = 0.0
         var drinkTotal: Double = 0.0
         var groceryTotal: Double = 0.0
         var transTotal: Double = 0.0
         var miscTotal: Double = 0.0
-        expItems.forEach { item in
-            print(item)
-            let expCat = item.expCategory!
+        for expenseKey in expenses[idx].keys {
+            let expCat = expenses[idx][expenseKey]?.expCategory
+            let expAmt = expenses[idx][expenseKey]?.expAmount
             if expCat == "Food" {
-                foodTotal += Double(item.expAmount!) ?? 0.0
+                foodTotal += Double(expAmt!) ?? 0.0
             } else if expCat == "Drinks" {
-                drinkTotal += Double(item.expAmount!) ?? 0.0
+                drinkTotal += Double(expAmt!) ?? 0.0
             } else if expCat == "Grocery" {
-                groceryTotal += Double(item.expAmount!) ?? 0.0
+                groceryTotal += Double(expAmt!) ?? 0.0
             } else if expCat == "Transport" {
-                transTotal += Double(item.expAmount!) ?? 0.0
+                transTotal += Double(expAmt!) ?? 0.0
             } else if expCat == "Misc" {
-                miscTotal += Double(item.expAmount!) ?? 0.0
+                miscTotal += Double(expAmt!) ?? 0.0
             }
         }
+        // TODO: Could use this to display a "Current" pie graph
+        //        expItems.forEach { item in
+        //            print(item)
+        //            let expCat = item.expCategory!
+        //            if expCat == "Food" {
+        //                foodTotal += Double(item.expAmount!) ?? 0.0
+        //            } else if expCat == "Drinks" {
+        //                drinkTotal += Double(item.expAmount!) ?? 0.0
+        //            } else if expCat == "Grocery" {
+        //                groceryTotal += Double(item.expAmount!) ?? 0.0
+        //            } else if expCat == "Transport" {
+        //                transTotal += Double(item.expAmount!) ?? 0.0
+        //            } else if expCat == "Misc" {
+        //                miscTotal += Double(item.expAmount!) ?? 0.0
+        //            }
+        //        }
         return [foodTotal, drinkTotal, groceryTotal, transTotal, miscTotal]
     }
 }

@@ -9,12 +9,19 @@ import SwiftUI
 
 import CoreData
 
+// Our observable object class
+class NumLogsThisSession: ObservableObject {
+    @Published var count = 0
+}
+
 struct ContentView: View {
     
     @Environment(\.managedObjectContext) private var viewContext
     
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
+    
+    @StateObject var numLogsThisSession = NumLogsThisSession()
     
     var drinksExp: Double = 0.0
     var foodExp: Double = 0.0
@@ -86,7 +93,12 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-        }
+        }.environmentObject(numLogsThisSession)
+        // Can use this to allow user to scroll horizontally between
+        //   tabs, with small icons at the bottom as page indicators.
+        //   Can even turn off the page indicators with the .never
+//        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        
         .accentColor(.black)
     }
     

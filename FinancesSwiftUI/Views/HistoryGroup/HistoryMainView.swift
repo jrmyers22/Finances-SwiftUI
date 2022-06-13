@@ -9,9 +9,10 @@ import SwiftUI
 
 struct HistoryMainView: View {
     
+    @EnvironmentObject var numLogsThisSession: NumLogsThisSession
+    
     var body: some View {
         NavigationView {
-            
             if getPreviousExpenses()["previousExpenses"]?.count ?? 0 != 0 {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -23,20 +24,15 @@ struct HistoryMainView: View {
             } else {
                 VStack {
                     Spacer()
-                    Text("No saved expense history.\nSave a snapshot of your expenses in the \"Total\" screen.")
+                    Text("No saved expense history.")
+                        .font(.title)
+                    Spacer()
+                    Text("Save a snapshot of your expenses in the \"Total\" screen.")
                     Spacer()
                 }
             }
         }
     }
-    
-    //    func displayChartsOrText(): View {
-    //        if getPreviousExpenses()["previousExpenses"]?.count ?? 0 != 0 {
-    //            return CardWithPieChart(expenses: getPreviousExpenses()["previousExpenses"]!)
-    //        } else {
-    //            return Text("No saved expense history.")
-    //        }
-    //    }
     
     // Get value from Documents directory defaults.json file
     func getPreviousExpenses() -> [String: [[String: PreviousExpense]]] {
