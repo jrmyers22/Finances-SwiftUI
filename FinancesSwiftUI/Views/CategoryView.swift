@@ -13,7 +13,8 @@ struct CategoryView: View {
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
     
-    @EnvironmentObject var numLogsThisSession: NumLogsThisSession
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
+    
     
     @State private var addItemScreenIsShowing = false
     @State var showingDeleteAllAlert = false
@@ -75,12 +76,12 @@ struct CategoryView: View {
                                 .foregroundColor(Color.white)
                                 .padding(.top, 40)
                                 .padding(.trailing, 30)
-                        }.alert(isPresented: $showingSaveToHistoryAlert) {
+                        }
+                        .alert(isPresented: $showingSaveToHistoryAlert) {
                             Alert(title: Text("Save to History?"),
                                   message: Text("This date range will be available in the \"History\" tab."),
                                   primaryButton: .default(Text("Save"), action: {
                                 print("Saving all expenses to file")
-                                numLogsThisSession.count += 1
                                 updatePreviousExpenses()
                             }),
                                   secondaryButton: .cancel(Text("Cancel")))
@@ -154,11 +155,7 @@ struct CategoryView: View {
         }
         
         // Get the existing previous-expenses.json
-        var prevExpenses = getPreviousExpenses()
-        
-//        let jsonEncoder = JSONEncoder()
-//        let jsonData = try jsonEncoder.encode(prevExpenses["previousExpenses"])
-//        let json = String(data: jsonData, encoding: String.Encoding.utf16)
+        let prevExpenses = getPreviousExpenses()
         
         var prevExpensesJSON: [String: Any] = [:]
         if prevExpenses.isEmpty {
@@ -181,6 +178,7 @@ struct CategoryView: View {
             print (jsonString)
             try jsonString.write(to: url, atomically: true, encoding: .utf8)
             print("Successfully wrote to previous-expenses.json")
+            self.numLogsThisSession.count += 1
         } catch {
             let error = error as NSError?
             fatalError("Unresolved Error: \(String(describing: error))")
@@ -194,14 +192,8 @@ struct CategoryView: View {
         do {
             let data = try Data(contentsOf: url, options: .mappedIfSafe)
             let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
-            let jsonResult2 = jsonResult as? [String: [Any]] ?? [:]
-                
-//            let input = try String(contentsOf: url)
-//            let json = input.data(using: .utf8)!
-//            let decoder = JSONDecoder()
-//            var previousExpenses = try decoder.decode([String:[[String: PreviousExpense]]].self, from: json)
-//            print(previousExpenses)
-            return jsonResult2
+            let jsonAsStr = jsonResult as? [String: [Any]] ?? [:]
+            return jsonAsStr
         } catch {
             print("Error reading from the previous-expenses.json file")
             print(error)

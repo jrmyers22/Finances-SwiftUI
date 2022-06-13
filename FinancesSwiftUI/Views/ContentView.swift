@@ -11,6 +11,10 @@ import CoreData
 
 // Our observable object class
 class NumLogsThisSession: ObservableObject {
+    private init() { }
+    
+    static let shared  = NumLogsThisSession()
+    
     @Published var count = 0
 }
 
@@ -21,7 +25,7 @@ struct ContentView: View {
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
     
-    @StateObject var numLogsThisSession = NumLogsThisSession()
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
     
     var drinksExp: Double = 0.0
     var foodExp: Double = 0.0
@@ -71,8 +75,6 @@ struct ContentView: View {
                 Spacer()
                 // Add Button
                 HStack {
-//                    Spacer()
-//                    AddButtonView(buttonText: "settings")
                     Spacer()
                     AddButtonView(buttonText: "add")
                         .padding(.trailing, Constants.Views.SCREEN_WIDTH * 0.15)
@@ -93,7 +95,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-        }.environmentObject(numLogsThisSession)
+        }.environmentObject(self.numLogsThisSession)
         // Can use this to allow user to scroll horizontally between
         //   tabs, with small icons at the bottom as page indicators.
         //   Can even turn off the page indicators with the .never

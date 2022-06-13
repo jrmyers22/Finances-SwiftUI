@@ -64,6 +64,7 @@ public struct PieChartWithList: View {
                     }
 
                     HStack {
+                        // TODO: Replace this with the correct date (prob pass it into this view)
                         Text("05/01/22 - 5/31/22")
                             .font(.title)
                             .padding()

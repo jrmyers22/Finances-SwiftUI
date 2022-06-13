@@ -7,35 +7,45 @@
 
 import SwiftUI
 
+extension Int: Identifiable {
+    public var id: Int { self }
+}
+
 struct CardWithPieChart: View {
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
     
     @State private var historyItemScreenIsShowing = false
+    @State var selectedExpense: Int? = nil
     
     var expenses: [[String: PreviousExpense]]
     
     var body: some View {
-        ForEach(0..<expenses.count) { idx in
-            Button(action: {
-                historyItemScreenIsShowing = true
-            }) {
-                ZStack {
-                    Text(getFirstExpenseDate())
-                        .bold()
-                        .font(.title2)
-                        .padding(.leading, Constants.Views.SCREEN_WIDTH * 0.05)
-                        .padding(.top, Constants.Views.SCREEN_HEIGHT * 0.4)
-                        .foregroundColor(Color.gray)
-                    
-                    PieChartView(values: getTotalsPerCategory(idx: idx), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
-                        .frame(width: Constants.Views.SCREEN_WIDTH * 0.8, height: Constants.Views.SCREEN_HEIGHT * 0.4, alignment: .center)
-                        .padding(.bottom, Constants.Views.SCREEN_HEIGHT * 0.1)
-                    
-                }.frame(width: Constants.Views.SCREEN_WIDTH * 0.9, height: Constants.Views.SCREEN_HEIGHT * 0.5, alignment: .center)
-            }.sheet(isPresented: $historyItemScreenIsShowing, onDismiss: {}, content: {
-                PieChartWithList(values: getTotalsPerCategory(idx: idx), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
-            })
+        ForEach(Array(expenses.enumerated()), id: \.offset) { index, element in
+            ZStack {
+                // TODO: Change this to get the correct date of each expense
+//                Text(getFirstExpenseDate())
+                Text("TODO REPLACE ME")
+                    .bold()
+                    .font(.title2)
+                    .padding(.leading, Constants.Views.SCREEN_WIDTH * 0.05)
+                    .padding(.top, Constants.Views.SCREEN_HEIGHT * 0.4)
+                    .foregroundColor(Color.gray)
+                
+                PieChartView(values: getTotalsPerCategory(idx: index), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
+                    .frame(width: Constants.Views.SCREEN_WIDTH * 0.8, height: Constants.Views.SCREEN_HEIGHT * 0.4, alignment: .center)
+                    .padding(.bottom, Constants.Views.SCREEN_HEIGHT * 0.1)
+                
+            }.frame(width: Constants.Views.SCREEN_WIDTH * 0.9, height: Constants.Views.SCREEN_HEIGHT * 0.5, alignment: .center)
+                .onTapGesture(count: 1) {
+                    historyItemScreenIsShowing = true
+                    self.selectedExpense = index
+                }
+                .sheet(item: self.$selectedExpense, content: { selectedExpense in
+                    // INFO: Uses .sheet(item: Binding...) instead of .sheet(isPresented: Binding...) because this makes the
+                    //       sheet re-draw when the item's state is changed. isPresented does not redraw.
+                    PieChartWithList(values: getTotalsPerCategory(idx: selectedExpense), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
+                })
         }
     }
     

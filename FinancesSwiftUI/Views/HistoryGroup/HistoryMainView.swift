@@ -9,26 +9,26 @@ import SwiftUI
 
 struct HistoryMainView: View {
     
-    @EnvironmentObject var numLogsThisSession: NumLogsThisSession
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
     
     var body: some View {
         NavigationView {
-            if getPreviousExpenses()["previousExpenses"]?.count ?? 0 != 0 {
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        ForEach(0..<(getPreviousExpenses()["previousExpenses"]!.count)) {_ in
+            VStack {
+                if getPreviousExpenses()["previousExpenses"]?.count ?? 0 != 0 {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 20) {
                             CardWithPieChart(expenses: getPreviousExpenses()["previousExpenses"]!)
-                        }
-                    }.padding()
-                }.navigationTitle(Text("History"))
-            } else {
-                VStack {
-                    Spacer()
-                    Text("No saved expense history.")
-                        .font(.title)
-                    Spacer()
-                    Text("Save a snapshot of your expenses in the \"Total\" screen.")
-                    Spacer()
+                        }.padding()
+                    }.navigationTitle(Text("History"))
+                } else {
+                    VStack {
+                        Spacer()
+                        Text("No saved expense history.")
+                            .font(.title)
+                        Spacer()
+                        Text("Save a snapshot of your expenses in the \"Total\" screen.")
+                        Spacer()
+                    }
                 }
             }
         }
