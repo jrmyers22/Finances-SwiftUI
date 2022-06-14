@@ -7,6 +7,7 @@ public struct PieChartWithList: View {
     public let values: [Double]
     public let names: [String]
     public let formatter: (Double) -> String
+    public let title: String
     
     public var colors: [Color]
     public var backgroundColor: Color
@@ -29,10 +30,11 @@ public struct PieChartWithList: View {
         return tempSlices
     }
     
-    public init(values:[Double], names: [String], formatter: @escaping (Double) -> String, colors: [Color] = [Color("FoodCategoryColor"), Color("DrinkCategoryColor"), Color("GroceryCategoryColor"), Color("TransportationCategoryColor"), Color("MiscCategoryColor")], backgroundColor: Color = Color.white, widthFraction: CGFloat = 0.75, innerRadiusFraction: CGFloat = 0.60){
+    public init(values:[Double], names: [String], formatter: @escaping (Double) -> String, colors: [Color] = [Color("FoodCategoryColor"), Color("DrinkCategoryColor"), Color("GroceryCategoryColor"), Color("TransportationCategoryColor"), Color("MiscCategoryColor")], backgroundColor: Color = Color.white, widthFraction: CGFloat = 0.75, innerRadiusFraction: CGFloat = 0.60, title: String){
         self.values = values
         self.names = names
         self.formatter = formatter
+        self.title = title
         
         self.colors = colors
         self.backgroundColor = backgroundColor
@@ -65,7 +67,7 @@ public struct PieChartWithList: View {
 
                     HStack {
                         // TODO: Replace this with the correct date (prob pass it into this view)
-                        Text("05/01/22 - 5/31/22")
+                        Text(title)
                             .font(.title)
                             .padding()
                         Spacer()
@@ -120,7 +122,7 @@ struct PieChartRows: View {
 @available(OSX 10.15.0, *)
 struct PieChartWithList_Previews: PreviewProvider {
     static var previews: some View {
-        PieChartWithList(values: [1300, 500, 300, 100, 200], names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
+        PieChartWithList(values: [1300, 500, 300, 100, 200], names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)}, title: "Testing")
     }
 }
 

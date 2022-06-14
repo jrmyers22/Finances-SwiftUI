@@ -23,9 +23,7 @@ struct CardWithPieChart: View {
     var body: some View {
         ForEach(Array(expenses.enumerated()), id: \.offset) { index, element in
             ZStack {
-                // TODO: Change this to get the correct date of each expense
-//                Text(getFirstExpenseDate())
-                Text("TODO REPLACE ME")
+                Text(getExpenseDateRange(idx: index))
                     .bold()
                     .font(.title2)
                     .padding(.leading, Constants.Views.SCREEN_WIDTH * 0.05)
@@ -44,18 +42,33 @@ struct CardWithPieChart: View {
                 .sheet(item: self.$selectedExpense, content: { selectedExpense in
                     // INFO: Uses .sheet(item: Binding...) instead of .sheet(isPresented: Binding...) because this makes the
                     //       sheet re-draw when the item's state is changed. isPresented does not redraw.
-                    PieChartWithList(values: getTotalsPerCategory(idx: selectedExpense), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)})
+                    PieChartWithList(values: getTotalsPerCategory(idx: selectedExpense), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)}, title: getExpenseDateRange(idx: index))
                 })
         }
     }
     
-    // TODO: Get the range of first and last dates to return as the title
-    func getFirstExpenseDate() -> String {
-        var expenseDates: [String] = Array(expenses[0].keys)
-        for key in expenseDates {
-            return String(key.prefix(10))
+    func getExpenseDateRange(idx: Int) -> String {
+        let expenseDates: [String] = Array(expenses[idx].keys)
+        var returnStr = ""
+        if expenseDates.count > 1 && expenseDates[0].prefix(10) != expenseDates[expenseDates.count - 1].prefix(10) {
+            // return the range of first expenseDate to last expenseDate
+            let year1 = expenseDates[0].prefix(4)
+            let month1 = expenseDates[0].prefix(7).suffix(2)
+            let day1 = expenseDates[0].prefix(10).suffix(2)
+            let year2 = expenseDates[expenseDates.count - 1].prefix(4)
+            let month2 = expenseDates[expenseDates.count - 1].prefix(7).suffix(2)
+            let day2 = expenseDates[expenseDates.count - 1].prefix(10).suffix(2)
+            returnStr = "\(month1)/\(day1)/\(year1) - \(month2)/\(day2)/\(year2)"
+        } else {
+            // return just the first date
+            let year = expenseDates[0].prefix(4)
+            let month = expenseDates[0].prefix(7).suffix(2)
+            let day = expenseDates[0].prefix(10).suffix(2)
+            returnStr = "\(month)/\(day)/\(year)"
         }
-        return ""
+        
+        // format the dates
+        return returnStr
     }
     
     func getTotalsPerCategory(idx: Int) -> [Double] {
