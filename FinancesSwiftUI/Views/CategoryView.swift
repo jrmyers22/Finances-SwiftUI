@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct CategoryView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -19,6 +20,7 @@ struct CategoryView: View {
     @State private var addItemScreenIsShowing = false
     @State var showingDeleteAllAlert = false
     @State var showingSaveToHistoryAlert = false
+    @State var successfulSave = false
     
     var categoryItemsExist = false
     
@@ -81,9 +83,10 @@ struct CategoryView: View {
                             Alert(title: Text("Save to History?"),
                                   message: Text("This date range will be available in the \"History\" tab."),
                                   primaryButton: .default(Text("Save"), action: {
-                                print("Saving all expenses to file")
-                                updatePreviousExpenses()
-                            }),
+                                        print("Saving all expenses to file")
+                                        updatePreviousExpenses()
+                                        successfulSave = true
+                                    }),
                                   secondaryButton: .cancel(Text("Cancel")))
                         }
                         Spacer()
@@ -91,6 +94,46 @@ struct CategoryView: View {
                 } else {
                     // Show the Add button
                     AddButton(category: category)
+                }
+            }.toast(isPresenting: $successfulSave){
+                
+                // `.alert` is the default displayMode
+                AlertToast(type: .regular, title: "Saved!")
+                
+                //Choose .hud to toast alert from the top of the screen
+                //AlertToast(displayMode: .hud, type: .regular, title: "Message Sent!")
+            }
+            // Floating "Remove all expenses" button
+            if category == "Total" {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        ZStack {
+                            Circle()
+                                .fill(.gray)
+                                .frame(width: Constants.Views.SCREEN_WIDTH * 0.2, height: Constants.Views.SCREEN_WIDTH * 0.2)
+                            Image(systemName: "list.bullet.indent")
+                                .resizable()
+                                .foregroundColor(Color.white)
+                                .frame(width: 35, height: 25)
+                                .onTapGesture(count: 1) {
+                                    showingDeleteAllAlert = true
+                                }
+                        }.padding(.trailing, 50)
+                    }.padding(.bottom, 50)
+                }.alert(isPresented: $showingDeleteAllAlert) {
+                    Alert(title: Text("Delete all expenses?"),
+                          message: Text("This will remove all expenses on this screen. Your History will not be affected."),
+                          primaryButton: .default(Text("Delete All"), action: {
+                                print("Deleting all expenses")
+                                // delete all expenses
+                                withAnimation {
+                                    deleteAllItems()
+                                }
+                          }),
+                          secondaryButton: .cancel(Text("Cancel")))
+
                 }
             }
         }
