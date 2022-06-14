@@ -125,7 +125,7 @@ struct CategoryView: View {
                 }.alert(isPresented: $showingDeleteAllAlert) {
                     Alert(title: Text("Delete all expenses?"),
                           message: Text("This will remove all expenses on this screen. Your History will not be affected."),
-                          primaryButton: .default(Text("Delete All"), action: {
+                          primaryButton: .destructive(Text("Delete All"), action: {
                                 print("Deleting all expenses")
                                 // delete all expenses
                                 withAnimation {

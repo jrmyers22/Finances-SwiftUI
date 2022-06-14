@@ -67,7 +67,7 @@ struct SettingsView: View {
                         .padding(.top, 50)
                         .foregroundColor(Color.white)
                     TextField(
-                        getDefaultInfo()!.availableAmount,
+                        getDefaultInfo()?.availableAmount ?? "",
                         text: $availableAmount
                     ) { isEditing in
                         self.isEditingAvailAmt = isEditing

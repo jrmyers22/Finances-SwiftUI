@@ -17,7 +17,7 @@ struct HistoryMainView: View {
                 if getPreviousExpenses()["previousExpenses"]?.count ?? 0 != 0 {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 20) {
-                            CardWithPieChart(expenses: getPreviousExpenses()["previousExpenses"]!.reversed()) // reversed so that most recent is first 
+                            CardWithPieChart(expenses: getPreviousExpenses()["previousExpenses"]!.reversed()) // reversed so that most recent is first
                         }.padding()
                     }.navigationTitle(Text("History"))
                 } else {
@@ -27,7 +27,7 @@ struct HistoryMainView: View {
                             .font(.title)
                         Spacer()
                         Text("Save a snapshot of your expenses in the \"Total\" screen.")
-                        Spacer()
+                            .padding(.bottom, 20)
                     }
                 }
             }
