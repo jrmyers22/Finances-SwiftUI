@@ -150,11 +150,11 @@ struct CategoryView: View {
     }
     
     private func deleteExpItems(offsets: IndexSet) {
-        if category == Constants.Categories.TOTAL {
-            if expItems.count > 1 {
-                showingDeleteAllAlert = true
-            }
-        }
+//        if category == Constants.Categories.TOTAL {
+//            if expItems.count > 1 {
+//                showingDeleteAllAlert = true
+//            }
+//        }
         
         withAnimation {
             offsets.map { expItems[$0] }.forEach(viewContext.delete)

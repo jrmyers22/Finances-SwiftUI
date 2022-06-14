@@ -15,6 +15,8 @@ struct CardWithPieChart: View {
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
     
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
+    
     @State private var historyItemScreenIsShowing = false
     @State var selectedExpense: Int? = nil
     
@@ -42,13 +44,13 @@ struct CardWithPieChart: View {
                 .sheet(item: self.$selectedExpense, content: { selectedExpense in
                     // INFO: Uses .sheet(item: Binding...) instead of .sheet(isPresented: Binding...) because this makes the
                     //       sheet re-draw when the item's state is changed. isPresented does not redraw.
-                    PieChartWithList(values: getTotalsPerCategory(idx: selectedExpense), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)}, title: getExpenseDateRange(idx: index))
+                    PieChartWithList(values: getTotalsPerCategory(idx: selectedExpense), names: ["Food", "Drink", "Grocery", "Transportation", "Misc"], formatter: {value in String(format: "$%.2f", value)}, title: getExpenseDateRange(idx: index), expenseGroupIdx: selectedExpense)
                 })
         }
     }
     
     func getExpenseDateRange(idx: Int) -> String {
-        let expenseDates: [String] = Array(expenses[idx].keys)
+        let expenseDates: [String] = Array(expenses[idx].keys.sorted())
         var returnStr = ""
         if expenseDates.count > 1 && expenseDates[0].prefix(10) != expenseDates[expenseDates.count - 1].prefix(10) {
             // return the range of first expenseDate to last expenseDate
@@ -77,6 +79,9 @@ struct CardWithPieChart: View {
         var groceryTotal: Double = 0.0
         var transTotal: Double = 0.0
         var miscTotal: Double = 0.0
+        if idx > (expenses.count - 1) {
+            return []
+        }
         for expenseKey in expenses[idx].keys {
             let expCat = expenses[idx][expenseKey]?.expCategory
             let expAmt = expenses[idx][expenseKey]?.expAmount
