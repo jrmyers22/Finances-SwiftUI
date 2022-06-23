@@ -20,3 +20,21 @@ struct Expense {
         self.date = date
     }
 }
+
+struct PreviousExpense: Codable {
+    var expDate: String
+    var expDesc: String
+    var expCategory: String
+    var expAmount: String
+    
+    init(expDate: String, expDesc: String, expCategory: String, expAmount: String) {
+        self.expDate = expDate
+        self.expDesc = expDesc
+        self.expCategory = expCategory
+        self.expAmount = expAmount
+    }
+}
+
+struct PreviousExpenseArray: Codable {
+    var previousExpenses: [[PreviousExpense]]
+}

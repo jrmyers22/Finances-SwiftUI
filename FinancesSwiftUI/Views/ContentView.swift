@@ -9,12 +9,23 @@ import SwiftUI
 
 import CoreData
 
+// Our observable object class
+class NumLogsThisSession: ObservableObject {
+    private init() { }
+    
+    static let shared  = NumLogsThisSession()
+    
+    @Published var count = 0
+}
+
 struct ContentView: View {
     
     @Environment(\.managedObjectContext) private var viewContext
     
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
+    
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
     
     var drinksExp: Double = 0.0
     var foodExp: Double = 0.0
@@ -23,54 +34,74 @@ struct ContentView: View {
     var miscExp: Double = 0.0
     
     init() {
+//        UITabBar.appearance().backgroundColor = UIColor.lightGray
         if getDefaultInfo() == nil {
             setDefaultInfoForProperty(keyValue: ["availableAmount": "500.00", "payDays":"1,15"])
         }
     }
     
     var body: some View {
-        VStack {
-            
-            // Top information
-            HeaderView().padding(.top, 30)
-            Spacer()
-            
-            // All Buttons
-            VStack{
-                // First Row of Buttons
+        TabView {
+            VStack {
+                
+                // Top information
+                HeaderView().padding(.top, 30)
+                
+                // All Buttons
+                VStack{
+                    // First Row of Buttons
+                    HStack {
+                        Spacer()
+                        CategoryButton(category: "Drinks", total:"\(drinksExp)", color: Color("DrinkCategoryColor"))
+                            .padding(.leading)
+                        Spacer()
+                        CategoryButton(category: "Food", total:"\(foodExp)", color: Color("FoodCategoryColor"))
+                            .padding(.trailing)
+                        Spacer()
+                    }.padding(.bottom)
+                    // Second Row of Buttons
+                    HStack {
+                        Spacer()
+                        CategoryButton(category: "Grocery", total:"\(groceryExp)", color: Color("GroceryCategoryColor"))
+                            .padding(.leading)
+                        Spacer()
+                        CategoryButton(category: "Transport", total:"\(transportExp)", color: Color("TransportationCategoryColor"))
+                            .padding(.trailing)
+                        Spacer()
+                    }.padding(.bottom)
+                    // Bottom
+                    CategoryButton(category: "Misc", total:"\(miscExp)", color: Color("MiscCategoryColor"))
+                }
+                Spacer()
+                // Add Button
                 HStack {
                     Spacer()
-                    CategoryButton(category: "Drinks", total:"\(drinksExp)", color: Color("DrinkCategoryColor"))
-                        .padding(.leading)
-                    Spacer()
-                    CategoryButton(category: "Food", total:"\(foodExp)", color: Color("FoodCategoryColor"))
-                        .padding(.trailing)
-                    Spacer()
-                }.padding(.bottom)
-                // Second Row of Buttons
-                HStack {
-                    Spacer()
-                    CategoryButton(category: "Grocery", total:"\(groceryExp)", color: Color("GroceryCategoryColor"))
-                        .padding(.leading)
-                    Spacer()
-                    CategoryButton(category: "Transport", total:"\(transportExp)", color: Color("TransportationCategoryColor"))
-                        .padding(.trailing)
-                    Spacer()
-                }.padding(.bottom)
-                // Bottom
-                CategoryButton(category: "Misc", total:"\(miscExp)", color: Color("MiscCategoryColor"))
-            }
-            Spacer()
-            // Add Button
-            HStack {
-                Spacer()
-                AddButtonView(buttonText: "settings")
-                Spacer()
-                AddButtonView(buttonText: "add")
+                    AddButtonView(buttonText: "add")
+                        .padding(.trailing, Constants.Views.SCREEN_WIDTH * 0.15)
+                }
+                .padding(.bottom)
                 Spacer()
             }
-            Spacer()
-        }.background(Color.white).edgesIgnoringSafeArea(.all)
+            .tabItem {
+                Label("Expenses", systemImage: "square.stack")
+            }
+            .background(Color.white)
+            .edgesIgnoringSafeArea(.all)
+            HistoryMainView()
+                .tabItem {
+                    Label("History", systemImage: "chart.pie")
+                }
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
+        }.environmentObject(self.numLogsThisSession)
+        // Can use this to allow user to scroll horizontally between
+        //   tabs, with small icons at the bottom as page indicators.
+        //   Can even turn off the page indicators with the .never
+//        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        
+        .accentColor(.black)
     }
     
     struct DefaultInfo: Codable {

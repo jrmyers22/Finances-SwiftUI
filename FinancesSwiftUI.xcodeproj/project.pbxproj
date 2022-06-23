@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -21,8 +21,13 @@
 		16FC3212264ED6C20084C18A /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FC3211264ED6C20084C18A /* Constants.swift */; };
 		16FC3215264ED79C0084C18A /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FC3214264ED79C0084C18A /* Expense.swift */; };
 		16FC3218264EDEE10084C18A /* ExpenseRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FC3217264EDEE10084C18A /* ExpenseRowView.swift */; };
-		887F19D12845C61400EBEFCC /* Defaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 887F19D02845C61400EBEFCC /* Defaults.plist */; };
+		883815AD2858C6E4002903DF /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 883815AC2858C6E4002903DF /* AlertToast */; };
 		887F19D328467E3C00EBEFCC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887F19D228467E3C00EBEFCC /* SettingsView.swift */; };
+		888C53672852C2B000CF3091 /* CardWithPieChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888C53662852C2B000CF3091 /* CardWithPieChart.swift */; };
+		888C53692852C33E00CF3091 /* HistoryMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888C53682852C33E00CF3091 /* HistoryMainView.swift */; };
+		888C536C2852CA2600CF3091 /* PieChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888C536B2852CA2600CF3091 /* PieChartView.swift */; };
+		888C536E2852CA9A00CF3091 /* PieSliceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888C536D2852CA9A00CF3091 /* PieSliceView.swift */; };
+		888C53702852DDF500CF3091 /* PieChartWithList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888C536F2852DDF500CF3091 /* PieChartWithList.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,8 +47,12 @@
 		16FC3211264ED6C20084C18A /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		16FC3214264ED79C0084C18A /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
 		16FC3217264EDEE10084C18A /* ExpenseRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRowView.swift; sourceTree = "<group>"; };
-		887F19D02845C61400EBEFCC /* Defaults.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Defaults.plist; sourceTree = "<group>"; };
 		887F19D228467E3C00EBEFCC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		888C53662852C2B000CF3091 /* CardWithPieChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardWithPieChart.swift; sourceTree = "<group>"; };
+		888C53682852C33E00CF3091 /* HistoryMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryMainView.swift; sourceTree = "<group>"; };
+		888C536B2852CA2600CF3091 /* PieChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieChartView.swift; sourceTree = "<group>"; };
+		888C536D2852CA9A00CF3091 /* PieSliceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieSliceView.swift; sourceTree = "<group>"; };
+		888C536F2852DDF500CF3091 /* PieChartWithList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieChartWithList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				883815AD2858C6E4002903DF /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,7 +86,6 @@
 		16FC31DD264EBC9A0084C18A /* FinancesSwiftUI */ = {
 			isa = PBXGroup;
 			children = (
-				887F19D02845C61400EBEFCC /* Defaults.plist */,
 				16FC322B265CB24C0084C18A /* App */,
 				16FC320B264ED69D0084C18A /* Models */,
 				16FC31EE264EBE240084C18A /* Views */,
@@ -103,6 +112,7 @@
 				16FC3203264ECB630084C18A /* CategoryView.swift */,
 				16FC3217264EDEE10084C18A /* ExpenseRowView.swift */,
 				887F19D228467E3C00EBEFCC /* SettingsView.swift */,
+				888C536A2852C9F100CF3091 /* HistoryGroup */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -137,6 +147,18 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		888C536A2852C9F100CF3091 /* HistoryGroup */ = {
+			isa = PBXGroup;
+			children = (
+				888C53662852C2B000CF3091 /* CardWithPieChart.swift */,
+				888C53682852C33E00CF3091 /* HistoryMainView.swift */,
+				888C536B2852CA2600CF3091 /* PieChartView.swift */,
+				888C536D2852CA9A00CF3091 /* PieSliceView.swift */,
+				888C536F2852DDF500CF3091 /* PieChartWithList.swift */,
+			);
+			path = HistoryGroup;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -153,6 +175,9 @@
 			dependencies = (
 			);
 			name = FinancesSwiftUI;
+			packageProductDependencies = (
+				883815AC2858C6E4002903DF /* AlertToast */,
+			);
 			productName = FinancesSwiftUI;
 			productReference = 16FC31DB264EBC9A0084C18A /* FinancesSwiftUI.app */;
 			productType = "com.apple.product-type.application";
@@ -180,6 +205,9 @@
 				Base,
 			);
 			mainGroup = 16FC31D2264EBC9A0084C18A;
+			packageReferences = (
+				883815AB2858C6E4002903DF /* XCRemoteSwiftPackageReference "AlertToast" */,
+			);
 			productRefGroup = 16FC31DC264EBC9A0084C18A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -196,7 +224,6 @@
 			files = (
 				16FC31E6264EBC9F0084C18A /* Preview Assets.xcassets in Resources */,
 				16FC31E3264EBC9F0084C18A /* Assets.xcassets in Resources */,
-				887F19D12845C61400EBEFCC /* Defaults.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,11 +242,16 @@
 				16FC31F8264EC8390084C18A /* AddButtonView.swift in Sources */,
 				161CE2CC265CBC2800A459A4 /* Persistence.swift in Sources */,
 				16FC3218264EDEE10084C18A /* ExpenseRowView.swift in Sources */,
+				888C536C2852CA2600CF3091 /* PieChartView.swift in Sources */,
 				161CE2C9265CBB8B00A459A4 /* ExpItems.xcdatamodeld in Sources */,
 				16FC3215264ED79C0084C18A /* Expense.swift in Sources */,
 				16FC31F5264EC6B00084C18A /* HeaderView.swift in Sources */,
+				888C53672852C2B000CF3091 /* CardWithPieChart.swift in Sources */,
+				888C536E2852CA9A00CF3091 /* PieSliceView.swift in Sources */,
 				16FC3212264ED6C20084C18A /* Constants.swift in Sources */,
 				887F19D328467E3C00EBEFCC /* SettingsView.swift in Sources */,
+				888C53692852C33E00CF3091 /* HistoryMainView.swift in Sources */,
+				888C53702852DDF500CF3091 /* PieChartWithList.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,6 +382,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"FinancesSwiftUI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7GRM878X7P;
 				ENABLE_PREVIEWS = YES;
@@ -359,6 +392,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jacobmyers.FinancesSwiftUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -372,6 +406,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"FinancesSwiftUI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7GRM878X7P;
 				ENABLE_PREVIEWS = YES;
@@ -381,6 +416,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jacobmyers.FinancesSwiftUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -410,6 +446,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		883815AB2858C6E4002903DF /* XCRemoteSwiftPackageReference "AlertToast" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/elai950/AlertToast.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		883815AC2858C6E4002903DF /* AlertToast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 883815AB2858C6E4002903DF /* XCRemoteSwiftPackageReference "AlertToast" */;
+			productName = AlertToast;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		161CE2C7265CBB8B00A459A4 /* ExpItems.xcdatamodeld */ = {
