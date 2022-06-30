@@ -14,7 +14,6 @@ struct HeaderView: View {
     @FetchRequest(sortDescriptors: [])
     private var expItems: FetchedResults<ExpItem>
     
-    
     @State private var categoryViewIsShowing = false
     @State private var nextPayDateAlertIsShowing = false
     @State private var dailyBreakdownViewIsShowing = false

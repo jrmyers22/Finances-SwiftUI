@@ -1,5 +1,5 @@
 //
-//  AddItemView.swift
+//  EditItemView.swift
 //  FinancesSwiftUI
 //
 //  Created by Jacob Myers on 5/14/21.
@@ -7,31 +7,44 @@
 
 import SwiftUI
 
-struct AddItemView: View {
+struct EditItemView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.presentationMode) var presentationMode
     
-    @State private var description: String = ""
-    @State private var amount: String = ""
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
+    
+    @FetchRequest(sortDescriptors: [])
+    private var expItems: FetchedResults<ExpItem>
+    
+    @State private var description: String
+    @State private var amount: String
+    @State private var id: String
     @State private var isEditingDesc = false
     @State private var isEditingAmount = false
-    @State private var category = "Grocery"
+    @State private var category: String
     @State private var showingIncompleteAlert = false
     @State private var invalidAmountInput = false
     @State private var showingSuccessfulAlert = false
     let categories = ["Drinks", "Food", "Grocery", "Transport", "Misc"]
     
-    var startCat: String
+    @State private var startCat: String
     
-    init(startCategory: String? = "Drinks") {
+    // addItem(description: description, category: category, amount: amount)
+    init(startCategory: String? = "Drinks", id: String, description: String, category: String, amount: String) {
         UITextField.appearance().backgroundColor = .lightGray
         UITextField.appearance().textColor = .white
-        startCat = startCategory!
+        // _fullText = State(initialValue: list[letter]!)
+        _startCat = State(initialValue: startCategory!)
+        _id = State(initialValue: id)
+        _description = State(initialValue: description)
+        _category = State(initialValue: category)
+        _amount = State(initialValue: amount)
     }
     
     var body: some View {
         
         VStack {
-            Text("New Expense")
+            Text("Edit Expense")
                 .font(.largeTitle)
                 .fontWeight(.black)
                 .padding(.top)
@@ -51,10 +64,10 @@ struct AddItemView: View {
                 ) { isEditing in
                     self.isEditingDesc = isEditing
                 } onCommit: {}
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(Color.white)
-                .padding(.trailing)
-                .font(.title)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .foregroundColor(Color.white)
+                    .padding(.trailing)
+                    .font(.title)
             }
             
             // Category Picker
@@ -78,7 +91,7 @@ struct AddItemView: View {
             HStack {
                 Text("$")
                     .bold()
-                    .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                    .font(.title)
                     .foregroundColor(Color.white)
                 
                 TextField(
@@ -87,12 +100,12 @@ struct AddItemView: View {
                 ) { isEditing in
                     self.isEditingAmount = isEditing
                 } onCommit: {}
-                .frame(width: 130)
-//                .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(Color.white)
-                .padding(.leading, -5)
-                .font(.title)
+                    .frame(width: 130)
+                //                .keyboardType(.decimalPad)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .foregroundColor(Color.white)
+                    .padding(.leading, -5)
+                    .font(.title)
                 
                 Button(action: {
                     hideKeyboard()
@@ -105,27 +118,26 @@ struct AddItemView: View {
             
             Spacer()
             
-            // Add Item Button
+            // Edit Item Button
             Button(action: {
+                self.numLogsThisSession.count += 1
                 if description == "" || amount == "" {
-                    simpleError()
                     showingIncompleteAlert = true
                 } else if !amount.allSatisfy({ $0.isNumber || $0 == "." }) {
                     // Anything other than a number or a period
                     // NOT (amount is all numbers and ONE decimal)
-                    simpleError()
                     invalidAmountInput = true
                 } else {
-                    addItem(description: description, category: category, amount: amount)
-                    print("Added item to core data")
+                    EditItem(id: id, description: description, category: category, amount: amount)
+                    print("Edited item in core data")
                     simpleSuccess()
                     showingSuccessfulAlert = true
                 }
             }) {
-                Text("Add Item")
+                Text("Update")
                     .bold()
                     .font(.title3)
-                    
+                
                     .padding(20.0)
                     .background(
                         Color.green
@@ -140,11 +152,13 @@ struct AddItemView: View {
                 Alert(title: Text("Not so fast!"), message: Text("The amount must only contain numbers and a decimal."), dismissButton: .default(Text("Gotcha")))
             }
             .alert(isPresented: $showingSuccessfulAlert) {
-                Alert(title: Text("Success!"), message: Text("Expense has been added."), dismissButton: .default(Text("Ok"), action: {
+                Alert(title: Text("Success!"), message: Text("Expense has been updated."), dismissButton: .default(Text("Ok"), action: {
                     hideKeyboard()
-                    clearData()
+                    //                    presentationMode.wrappedValue.dismiss()
+                    UIApplication.shared.windows.first?.rootViewController?.dismiss(animated: true, completion: nil)
+                    
                 }
-                ))
+                                                                                                                  ))
             }
             Spacer()
         }.background(Color.gray).edgesIgnoringSafeArea(.all)
@@ -156,40 +170,41 @@ struct AddItemView: View {
         print("Simple success vibration")
     }
     
-    func simpleError() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.error)
-        print("Simple error vibration")
-    }
-    
     private func clearData() {
         self.amount = ""
         self.description = ""
         self.category = "Grocery"
     }
     
-    private func addItem(description: String, category: String, amount: String) {
-        let newItem = ExpItem(context: viewContext)
+    private func EditItem(id: String, description: String, category: String, amount: String) {
+        var existingItem: ExpItem = ExpItem()
+        
+        // TODO: Try this with a closure function to clean it up
+        for item in expItems {
+            if item.id == id { existingItem = item }
+        }
+        
+        if existingItem.expDesc == "" { return; print("Can't find item to edit") }
+        
         if amount.contains(".") {
             let numsAfterDecimal = String(amount[amount.firstIndex(of: ".")!...])
             if numsAfterDecimal.count == 2 {
-                newItem.expAmount = amount + "0"
+                existingItem.expAmount = amount + "0"
             } else if numsAfterDecimal.count == 1 {
-                newItem.expAmount = amount + "00"
+                existingItem.expAmount = amount + "00"
             } else if numsAfterDecimal.count > 3 {
                 // get the index of the first decimal, drop the number of elements after the Hundreths (.00) place
-                newItem.expAmount = String(amount.dropLast(numsAfterDecimal.count - 3))
+                existingItem.expAmount = String(amount.dropLast(numsAfterDecimal.count - 3))
             } else {
-                newItem.expAmount = amount
+                existingItem.expAmount = amount
             }
         } else {
             // doesn't contain decimal
-            newItem.expAmount = amount + ".00"
+            existingItem.expAmount = amount + ".00"
         }
-        newItem.expDesc = description
-        newItem.expCategory = category
-        newItem.expDate = Date()
-        newItem.id = UUID().uuidString
+        existingItem.expDesc = description
+        existingItem.expCategory = category
+        existingItem.expDate = Date()
         
         do {
             try viewContext.save()
@@ -200,17 +215,10 @@ struct AddItemView: View {
     }
 }
 
-#if canImport(UIKit)
-extension View {
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
-#endif
-
-struct AddItemView_Previews: PreviewProvider {
+struct EditItemView_Previews: PreviewProvider {
     static var previews: some View {
-        AddItemView()
+
+        EditItemView(id: "", description: "", category: "", amount: "")
             .preferredColorScheme(.dark)
     }
 }

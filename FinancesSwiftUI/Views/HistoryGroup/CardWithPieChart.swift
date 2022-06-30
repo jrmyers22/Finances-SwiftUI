@@ -36,6 +36,11 @@ struct CardWithPieChart: View {
                     .frame(width: Constants.Views.SCREEN_WIDTH * 0.8, height: Constants.Views.SCREEN_HEIGHT * 0.4, alignment: .center)
                     .padding(.bottom, Constants.Views.SCREEN_HEIGHT * 0.1)
                 
+                RoundedRectangle(cornerRadius: 25.0)
+                    .strokeBorder(Color.gray, lineWidth: 2)
+                    .frame(width: Constants.Views.SCREEN_WIDTH * 0.9, height: Constants.Views.SCREEN_HEIGHT * 0.5, alignment: .center)
+                    .shadow(radius: 8)
+                
             }.frame(width: Constants.Views.SCREEN_WIDTH * 0.9, height: Constants.Views.SCREEN_HEIGHT * 0.5, alignment: .center)
                 .onTapGesture(count: 1) {
                     historyItemScreenIsShowing = true

@@ -15,6 +15,8 @@ struct DefaultInfo: Codable {
 struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     
+    @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
+    
     @State private var showingIncompleteAlert = false
     @State private var showingInvalidAvailAmountAlert = false
     @State private var showingInvalidPayDatesAlert = false
@@ -59,46 +61,63 @@ struct SettingsView: View {
                             showUnicorn.toggle()
                         })
                 }
-                HStack {
-                    Text("Starting Amount: $")
-                        .bold()
-                        .font(.headline)
-                        .padding(.leading)
-                        .padding(.top, 50)
-                        .foregroundColor(Color.white)
-                    TextField(
-                        getDefaultInfo()?.availableAmount ?? "",
-                        text: $availableAmount
-                    ) { isEditing in
-                        self.isEditingAvailAmt = isEditing
-                    } onCommit: {}
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(Color.white)
-                        .padding(.trailing)
-                        .padding(.top, 50)
-                        .font(.title2)
-                        .frame(width: Constants.Views.SCREEN_WIDTH * 0.55, height: Constants.Views.SCREEN_HEIGHT * 0.05, alignment: .center)
-                }
-                HStack {
-                    Text("Pay Dates:                  ")
-                        .bold()
-                        .font(.headline)
-                        .padding(.leading)
-                        .foregroundColor(Color.white)
+                HStack() {
                     Spacer()
-                    TextField(
-                        "ex. 1st, 15th = 1,15",
-                        text: $payDays
-                    )
-                    { isEditing in
-                        self.isEditingPayDates = isEditing
-                    } onCommit: {}
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(Color.white)
-                        .padding(.trailing)
-                        .font(.title2)
-                    .frame(width: Constants.Views.SCREEN_WIDTH * 0.55, height: Constants.Views.SCREEN_HEIGHT * 0.05, alignment: .center)
+                    VStack(alignment: .center) {
+                        Text("Starting Amount:")
+                            .bold()
+                            .font(.headline)
+                            .padding(.top)
+                            .foregroundColor(Color.white)
+                        HStack {
+                            Text("$")
+                                .bold()
+                                .font(.headline)
+                                .foregroundColor(Color.white)
+                            TextField(
+                                getDefaultInfo()?.availableAmount ?? "500.00",
+                                text: $availableAmount
+                            ) { isEditing in
+                                self.isEditingAvailAmt = isEditing
+                            } onCommit: {}
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .foregroundColor(Color.white)
+                                .font(.title2)
+                                .frame(width: Constants.Views.SCREEN_WIDTH * 0.55, height: Constants.Views.SCREEN_HEIGHT * 0.05, alignment: .center)
+                        }
+                    }.padding()
+                    Spacer()
                 }
+                
+                HStack() {
+                    Spacer()
+                    VStack(alignment: .center) {
+                        Text("Pay Dates:")
+                            .bold()
+                            .font(.headline)
+                            .foregroundColor(Color.white)
+                        HStack {
+                            Text("$")
+                                .bold()
+                                .font(.headline)
+                                .foregroundColor(Color.clear)
+                            TextField(
+                                "ex. 1st, 15th = 1,15",
+                                text: $payDays
+                            )
+                            { isEditing in
+                                self.isEditingPayDates = isEditing
+                            } onCommit: {}
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .foregroundColor(Color.white)
+                                .font(.title2)
+                                .frame(width: Constants.Views.SCREEN_WIDTH * 0.55, height: Constants.Views.SCREEN_HEIGHT * 0.05, alignment: .center)
+                        }
+                    }.padding()
+                    Spacer()
+                    
+                }
+                
                 // Add Item Button
                 Button(action: {
                     if availableAmount == "" && payDays == "" {
@@ -142,7 +161,7 @@ struct SettingsView: View {
                 }
                 .alert(isPresented: $showingDetail) {
                     
-                    return availableAmount != "" ? Alert(title: Text("Value Updated"), message: Text("Tap the \"Available\" text for the number to refresh"), dismissButton: .default(Text("Gotcha")) {
+                    return availableAmount != "" ? Alert(title: Text("Value Updated"), message: Text("Check it out in the \"Expenses\" screen."), dismissButton: .default(Text("Gotcha")) {
                         presentationMode.wrappedValue.dismiss()
                     }) : Alert(title: Text("Value Updated"), message: Text("Pay Dates refreshed."), dismissButton: .default(Text("Gotcha")) {
                         
@@ -168,6 +187,7 @@ struct SettingsView: View {
     //   encode to JSON again
     //   write to file
     func setDefaultInfoForProperty(keyValue: [String: String]) {
+        self.numLogsThisSession.count += 1
         var defaultInfo = getDefaultInfo()
         if keyValue.keys.contains("availableAmount") {
             print("Attempting to set value for: availableAmount")
@@ -192,6 +212,9 @@ struct SettingsView: View {
         } catch {
             print(error.localizedDescription)
         }
+        
+        availableAmount = ""
+        payDays = ""
         
     }
     

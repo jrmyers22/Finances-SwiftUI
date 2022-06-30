@@ -16,13 +16,12 @@ struct CategoryView: View {
     
     @ObservedObject var numLogsThisSession: NumLogsThisSession = .shared
     
-    
     @State private var addItemScreenIsShowing = false
     @State var showingDeleteAllAlert = false
     @State var showingSaveToHistoryAlert = false
     @State var successfulSave = false
     
-    var categoryItemsExist = false
+    @State var expenseToEdit: Expense?
     
     var category: String!
     
@@ -48,11 +47,31 @@ struct CategoryView: View {
                         // need \.self when iterating through a non-constant range of items
                         ForEach(0..<expItems.count, id: \.self) { i in
                             let expCat = expItems[i].expCategory!
-                            if expCat == category {
-                                ExpenseRowView(accentColor: accentColor, expense: expItems[i])
-                            } else if category == Constants.Categories.TOTAL {
-                                ExpenseRowView(accentColor: decideColor(category: expItems[i].expCategory!), expense: expItems[i])
+                            Group {
+                                if expCat == category {
+                                    ExpenseRowView(accentColor: accentColor, expense: expItems[i])
+                                } else if category == Constants.Categories.TOTAL {
+                                    ExpenseRowView(accentColor: decideColor(category: expItems[i].expCategory!), expense: expItems[i])
+                                }
+                            }.onTapGesture {
+                                print("Should display an edit view here...")
+                                if expItems[i].id == nil {
+                                    expItems[i].id = UUID().uuidString
+                                }
+                                expenseToEdit = Expense(id: expItems[i].id!,
+                                                        description: expItems[i].expDesc!,
+                                                        category: expItems[i].expCategory!,
+                                                        amount: expItems[i].expAmount!,
+                                                        date: expItems[i].expDate!)
                             }
+                            .sheet(item: $expenseToEdit,
+                                    onDismiss: nil) { expense in
+                                EditItemView(startCategory: expense.category,
+                                             id: expense.id,
+                                             description: expense.description,
+                                             category: expense.category,
+                                             amount: expense.amount)
+                             }
                         }.onDelete(perform: deleteExpItems)
                     }
                     .navigationBarTitle("")
@@ -85,6 +104,7 @@ struct CategoryView: View {
                                   primaryButton: .default(Text("Save"), action: {
                                         print("Saving all expenses to file")
                                         updatePreviousExpenses()
+                                        simpleSuccess()
                                         successfulSave = true
                                     }),
                                   secondaryButton: .cancel(Text("Cancel")))
@@ -98,6 +118,7 @@ struct CategoryView: View {
             }.toast(isPresenting: $successfulSave){
                 
                 // `.alert` is the default displayMode
+                // TODO: Haptic Feedback "Success"
                 AlertToast(type: .regular, title: "Saved!")
                 
                 //Choose .hud to toast alert from the top of the screen
@@ -128,6 +149,7 @@ struct CategoryView: View {
                           primaryButton: .destructive(Text("Delete All"), action: {
                                 print("Deleting all expenses")
                                 // delete all expenses
+                                simpleSuccess()
                                 withAnimation {
                                     deleteAllItems()
                                 }
@@ -137,6 +159,12 @@ struct CategoryView: View {
                 }
             }
         }
+    }
+    
+    func simpleSuccess() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        print("Simple success vibration")
     }
     
     private func deleteAllItems() {
@@ -150,12 +178,6 @@ struct CategoryView: View {
     }
     
     private func deleteExpItems(offsets: IndexSet) {
-//        if category == Constants.Categories.TOTAL {
-//            if expItems.count > 1 {
-//                showingDeleteAllAlert = true
-//            }
-//        }
-        
         withAnimation {
             offsets.map { expItems[$0] }.forEach(viewContext.delete)
             do {
