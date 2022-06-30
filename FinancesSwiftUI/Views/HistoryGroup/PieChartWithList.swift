@@ -81,6 +81,7 @@ public struct PieChartWithList: View {
                     PieChartRows(colors: self.colors, names: self.names, values: self.values.map { self.formatter($0) }, percents: self.values.map { String(format: "%.0f%%", $0 * 100 / self.values.reduce(0, +)) })
                     Divider().padding()
                     Button(action: {
+                        simpleSuccess()
                         removePreviousExpenseFromJSON(expenseGroupIdx: expenseGroupIdx)
                         presentationMode.wrappedValue.dismiss()
                     }) {
@@ -93,6 +94,12 @@ public struct PieChartWithList: View {
                 .foregroundColor(Color.black)
             }.padding()
         }
+    }
+    
+    func simpleSuccess() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        print("Simple success vibration")
     }
     
     private func removePreviousExpenseFromJSON(expenseGroupIdx: Int) {

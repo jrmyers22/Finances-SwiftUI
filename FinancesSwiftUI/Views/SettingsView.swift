@@ -213,6 +213,9 @@ struct SettingsView: View {
             print(error.localizedDescription)
         }
         
+        availableAmount = ""
+        payDays = ""
+        
     }
     
     // Get value from Documents directory defaults.json file
